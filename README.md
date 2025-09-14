@@ -14,6 +14,11 @@
     margin-top: 30px;
   }
   h2 { color: #333; }
+  .topo { margin-bottom: 15px; }
+  .topo button { padding: 10px 15px; margin-right: 5px; border-radius: 5px; border: none; cursor: pointer; color: #fff; font-weight: bold; }
+  .btn-reset { background-color: #f44336; }
+  .btn-export-geral { background-color: #607d8b; }
+  .btn-add { background-color: #4CAF50; }
   table { border-collapse: collapse; width: 90%; max-width: 900px; margin-bottom: 20px; }
   th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
   th { background-color: #ffcc00; }
@@ -22,7 +27,6 @@
   .btn-cerveja { background-color: #2196F3; }
   .btn-comida { background-color: #FF5722; }
   .btn-export { background-color: #795548; }
-  .btn-export-geral { background-color: #607d8b; margin-bottom: 15px; }
   td.total { font-weight: bold; }
   td[contenteditable="true"] { background: rgba(255,236,179,0.3); border: 1px dashed #ffcc00; }
   .comandaExport {
@@ -42,8 +46,11 @@
 <body>
 
 <h2>Comandas Detalhadas</h2>
-<button onclick="resetarComandas()">🔄 Resetar Todas as Comandas</button>
-<button class="btn-export-geral" onclick="exportarRelatorioGeral()">📋 Exportar Relatório Geral</button>
+<div class="topo">
+  <button class="btn-reset" onclick="resetarComandas()">🔄 Resetar Todas as Comandas</button>
+  <button class="btn-add" onclick="adicionarComanda()">➕ Adicionar Comanda</button>
+  <button class="btn-export-geral" onclick="exportarRelatorioGeral()">📋 Exportar Relatório Geral</button>
+</div>
 
 <table id="comandaTable">
   <tr>
@@ -62,16 +69,12 @@
 
 <script>
 const nomes = ["Lucas","Ana","Pedro","Maria","João","Fernanda","Carlos","Beatriz","Rafael","Julia"];
-const comandaTable = document.getElementById("comandaTable");
-
-// Produtos e preços
 const produtosLista = [
   {nome:"Refri", valor:5},
   {nome:"Cerveja", valor:15},
   {nome:"Comida", valor:25}
 ];
 
-// Inicializar comandas
 let comandas = [];
 if(localStorage.getItem("comandas")){
   comandas = JSON.parse(localStorage.getItem("comandas"));
@@ -88,8 +91,8 @@ if(localStorage.getItem("comandas")){
   localStorage.setItem("comandas", JSON.stringify(comandas));
 }
 
-// Atualizar tabela
 function atualizarTabela(){
+  const comandaTable = document.getElementById("comandaTable");
   comandaTable.innerHTML = `
     <tr>
       <th>Nome</th>
@@ -101,7 +104,7 @@ function atualizarTabela(){
       <th>Exportar</th>
     </tr>
   `;
-  
+
   comandas.forEach((c,index)=>{
     const row = comandaTable.insertRow();
 
@@ -111,9 +114,15 @@ function atualizarTabela(){
     nomeCell.contentEditable = "true";
     nomeCell.onblur = () => { c.nome = nomeCell.textContent; salvarComandas(); };
 
-    // Número
+    // Número editável
     const numCell = row.insertCell();
     numCell.textContent = c.numero;
+    numCell.contentEditable = "true";
+    numCell.onblur = () => { 
+      const n = parseInt(numCell.textContent);
+      c.numero = isNaN(n)?c.numero:n;
+      salvarComandas();
+    };
 
     // Botões produtos
     produtosLista.forEach(prod=>{
@@ -145,18 +154,27 @@ function atualizarTabela(){
   });
 }
 
-// Salvar localStorage
 function salvarComandas(){
   localStorage.setItem("comandas", JSON.stringify(comandas));
 }
 
-// Resetar todas
 function resetarComandas(){
   if(confirm("Deseja zerar todas as comandas?")){
     comandas.forEach(c=>{
       c.total=0;
       c.produtos = {Refri:0, Cerveja:0, Comida:0};
     });
+    salvarComandas();
+    atualizarTabela();
+  }
+}
+
+// Adicionar nova comanda
+function adicionarComanda(){
+  const nome = prompt("Digite o nome da pessoa:");
+  const numero = parseInt(prompt("Digite o número da comanda:"));
+  if(nome && !isNaN(numero)){
+    comandas.push({nome, numero, total:0, produtos:{Refri:0, Cerveja:0, Comida:0}});
     salvarComandas();
     atualizarTabela();
   }
