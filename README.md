@@ -10,14 +10,22 @@
     table { border-collapse: collapse; width: 90%; margin-bottom: 20px;}
     th, td { border: 1px solid #888; padding: 6px 10px; text-align: center; }
     th { background: #ffcc00; color: #000; }
-    td { background: #fff; color: #000; }
+    td { color: #000; }
     td[contenteditable="true"] { background: #fffae5; border: 1px dashed #ffcc00; }
+
+    /* Linhas alternadas */
+    tr:nth-child(even){ background: #fdf5e6; }
+    tr:nth-child(odd){ background: #fff; }
+
+    /* Destaque da linha com maior total */
+    .destaque { background: #fff9c4 !important; }
+
     button { padding: 4px 10px; margin: 2px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
     .btn-refri { background:#4CAF50; color:#fff; }
     .btn-cerveja { background:#2196F3; color:#fff; }
     .btn-comida { background:#FF9800; color:#fff; }
-    .btn-export, .btn-add, .btn-geral { background:#ffcc00; color:#000; }
-    .btn-export:hover, .btn-add:hover, .btn-geral:hover { background:#ffb300; }
+    .btn-export, .btn-add, .btn-geral, .btn-reset { background:#ffcc00; color:#000; }
+    .btn-export:hover, .btn-add:hover, .btn-geral:hover, .btn-reset:hover { background:#ffb300; }
   </style>
 </head>
 <body>
@@ -26,6 +34,7 @@
 <div style="margin-bottom:10px;">
   <button class="btn-add" onclick="adicionarComanda()">➕ Adicionar Nova Comanda</button>
   <button class="btn-geral" onclick="exportarComandasGerais()">📄 Exportar Relatório Geral</button>
+  <button class="btn-reset" onclick="resetarComandas()">🔄 Resetar Comandas</button>
 </div>
 
 <table id="comandaTable">
@@ -47,11 +56,9 @@ const produtosLista = [
   {nome:"Comida", valor:25}
 ];
 
-// Nomes aleatórios iniciais
 let nomes = ["João","Maria","Pedro","Ana","Lucas"];
 let comandas = [];
 
-// Carregar do localStorage
 if(localStorage.getItem("comandas")){
   comandas = JSON.parse(localStorage.getItem("comandas"));
 }else{
@@ -66,12 +73,18 @@ if(localStorage.getItem("comandas")){
   salvarComandas();
 }
 
-// Função para salvar
 function salvarComandas(){
   localStorage.setItem("comandas", JSON.stringify(comandas));
 }
 
-// Atualizar tabela completa
+function resetarComandas(){
+  if(confirm("Deseja realmente resetar todas as comandas? Esta ação não pode ser desfeita.")){
+    comandas = [];
+    localStorage.removeItem("comandas");
+    atualizarTabela();
+  }
+}
+
 function atualizarTabela(){
   const table = document.getElementById("comandaTable");
   table.innerHTML = `<tr>
@@ -83,13 +96,18 @@ function atualizarTabela(){
     <th>Total</th>
     <th>Exportar PNG</th>
   </tr>`;
-  comandas.forEach(c=> adicionarLinhaTabela(c));
+
+  // Encontrar total máximo para destaque
+  let maxTotal = Math.max(...comandas.map(c=>c.total));
+
+  comandas.forEach(c=> adicionarLinhaTabela(c,maxTotal));
 }
 
-// Adicionar linha individual
-function adicionarLinhaTabela(c){
+function adicionarLinhaTabela(c,maxTotal){
   const table = document.getElementById("comandaTable");
   const row = table.insertRow();
+
+  if(c.total === maxTotal && maxTotal > 0) row.classList.add("destaque");
 
   const nomeCell = row.insertCell();
   nomeCell.textContent = c.nome;
@@ -126,7 +144,6 @@ function adicionarLinhaTabela(c){
   exportCell.appendChild(btnExport);
 }
 
-// Adicionar nova comanda
 function adicionarComanda(){
   const nome = prompt("Digite o nome da pessoa:");
   const numero = parseInt(prompt("Digite o número da comanda:"));
@@ -134,11 +151,10 @@ function adicionarComanda(){
     const novaComanda = {nome,numero,total:0,produtos:{Refri:0,Cerveja:0,Comida:0}};
     comandas.push(novaComanda);
     salvarComandas();
-    adicionarLinhaTabela(novaComanda);
+    adicionarLinhaTabela(novaComanda,0);
   }
 }
 
-// Exportar comanda detalhada em PNG
 function exportarComandaDetalhada(index){
   const c = comandas[index];
   const div = document.createElement("div");
@@ -159,7 +175,6 @@ function exportarComandaDetalhada(index){
   });
 }
 
-// Exportar todas as comandas em relatório geral
 function exportarComandasGerais(){
   const div = document.createElement("div");
   div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="400px"; div.style.fontFamily="Arial";
@@ -185,7 +200,6 @@ function exportarComandasGerais(){
   });
 }
 
-// Inicializar tabela
 atualizarTabela();
 </script>
 
