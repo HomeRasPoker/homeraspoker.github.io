@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Comanda Persistente</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -20,7 +21,18 @@
   .btn-refri { background-color: #4CAF50; }
   .btn-cerveja { background-color: #2196F3; }
   .btn-comida { background-color: #FF5722; }
+  .btn-export { background-color: #795548; }
   td.total { font-weight: bold; }
+  .comandaExport {
+    display: none;
+    padding: 20px;
+    border-radius: 10px;
+    background: #fff8e1;
+    border: 2px solid #ffcc00;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
@@ -35,8 +47,12 @@
     <th>Cerveja (R$15)</th>
     <th>Comida (R$25)</th>
     <th>Total</th>
+    <th>Exportar</th>
   </tr>
 </table>
+
+<!-- Div temporária para exportar a comanda -->
+<div id="comandaExport" class="comandaExport"></div>
 
 <script>
 const nomes = ["Lucas", "Ana", "Pedro", "Maria", "João", "Fernanda", "Carlos", "Beatriz", "Rafael", "Julia"];
@@ -54,9 +70,8 @@ if(localStorage.getItem("comandas")){
   localStorage.setItem("comandas", JSON.stringify(comandas));
 }
 
-// Função para atualizar a tabela
+// Atualizar tabela
 function atualizarTabela(){
-  // Limpar tabela (exceto cabeçalho)
   comandaTable.innerHTML = `
     <tr>
       <th>Nome</th>
@@ -65,13 +80,14 @@ function atualizarTabela(){
       <th>Cerveja (R$15)</th>
       <th>Comida (R$25)</th>
       <th>Total</th>
+      <th>Exportar</th>
     </tr>
   `;
 
   comandas.forEach((comanda,index)=>{
     const row = comandaTable.insertRow();
     
-    // Nome
+    // Nome editável
     const nomeCell = row.insertCell();
     nomeCell.textContent = comanda.nome;
     nomeCell.contentEditable = "true";
@@ -80,43 +96,42 @@ function atualizarTabela(){
       salvarComandas();
     };
 
-    // Número da comanda
+    // Número
     const numCell = row.insertCell();
     numCell.textContent = comanda.numero;
 
-    // Refri
-    const refriCell = row.insertCell();
-    const btnRefri = document.createElement("button");
-    btnRefri.textContent = "Refri";
-    btnRefri.className = "btn-refri";
-    btnRefri.onclick = () => adicionarValor(index,5);
-    refriCell.appendChild(btnRefri);
-
-    // Cerveja
-    const cervejaCell = row.insertCell();
-    const btnCerveja = document.createElement("button");
-    btnCerveja.textContent = "Cerveja";
-    btnCerveja.className = "btn-cerveja";
-    btnCerveja.onclick = () => adicionarValor(index,15);
-    cervejaCell.appendChild(btnCerveja);
-
-    // Comida
-    const comidaCell = row.insertCell();
-    const btnComida = document.createElement("button");
-    btnComida.textContent = "Comida";
-    btnComida.className = "btn-comida";
-    btnComida.onclick = () => adicionarValor(index,25);
-    comidaCell.appendChild(btnComida);
+    // Botões de produtos
+    const produtos = [
+      {nome:"Refri", valor:5, classe:"btn-refri"},
+      {nome:"Cerveja", valor:15, classe:"btn-cerveja"},
+      {nome:"Comida", valor:25, classe:"btn-comida"}
+    ];
+    produtos.forEach(prod=>{
+      const cell = row.insertCell();
+      const btn = document.createElement("button");
+      btn.textContent = prod.nome;
+      btn.className = prod.classe;
+      btn.onclick = () => adicionarValor(index, prod.valor);
+      cell.appendChild(btn);
+    });
 
     // Total
     const totalCell = row.insertCell();
     totalCell.textContent = `R$${comanda.total}`;
     totalCell.className = "total";
+
+    // Exportar botão
+    const exportCell = row.insertCell();
+    const btnExport = document.createElement("button");
+    btnExport.textContent = "Exportar PNG";
+    btnExport.className = "btn-export";
+    btnExport.onclick = () => exportarComanda(index);
+    exportCell.appendChild(btnExport);
   });
 }
 
-// Adicionar valor à comanda
-function adicionarValor(indice,valor){
+// Adicionar valor
+function adicionarValor(indice, valor){
   comandas[indice].total += valor;
   salvarComandas();
   atualizarTabela();
@@ -134,6 +149,25 @@ function resetarComandas(){
     salvarComandas();
     atualizarTabela();
   }
+}
+
+// Exportar comanda individual
+function exportarComanda(indice){
+  const c = comandas[indice];
+  const exportDiv = document.getElementById("comandaExport");
+  exportDiv.style.display = "block";
+  exportDiv.innerHTML = `
+    <h3>Comanda Nº ${c.numero}</h3>
+    <p>Nome: ${c.nome}</p>
+    <p>Total: R$${c.total}</p>
+  `;
+  html2canvas(exportDiv).then(canvas=>{
+    const link = document.createElement("a");
+    link.download = `comanda_${c.numero}_${c.nome}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    exportDiv.style.display = "none";
+  });
 }
 
 // Inicializar
