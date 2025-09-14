@@ -34,7 +34,7 @@
 <div style="margin-bottom:10px;">
   <button class="btn-add" onclick="adicionarComanda()">➕ Adicionar Nova Comanda</button>
   <button class="btn-geral" onclick="exportarComandasGerais()">📄 Exportar Relatório Geral</button>
-  <button class="btn-reset" onclick="resetarComandas()">🔄 Resetar Comandas</button>
+  <button class="btn-reset" onclick="resetarConsumoComandas()">🔄 Resetar Consumo</button>
 </div>
 
 <table id="comandaTable">
@@ -77,10 +77,13 @@ function salvarComandas(){
   localStorage.setItem("comandas", JSON.stringify(comandas));
 }
 
-function resetarComandas(){
-  if(confirm("Deseja realmente resetar todas as comandas? Esta ação não pode ser desfeita.")){
-    comandas = [];
-    localStorage.removeItem("comandas");
+function resetarConsumoComandas(){
+  if(confirm("Deseja realmente resetar o consumo de todas as comandas? Os nomes e números permanecerão.")){
+    comandas.forEach(c=>{
+      c.total = 0;
+      c.produtos = {Refri:0,Cerveja:0,Comida:0};
+    });
+    salvarComandas();
     atualizarTabela();
   }
 }
@@ -97,7 +100,6 @@ function atualizarTabela(){
     <th>Exportar PNG</th>
   </tr>`;
 
-  // Encontrar total máximo para destaque
   let maxTotal = Math.max(...comandas.map(c=>c.total));
 
   comandas.forEach(c=> adicionarLinhaTabela(c,maxTotal));
