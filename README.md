@@ -22,6 +22,7 @@
   .btn-cerveja { background-color: #2196F3; }
   .btn-comida { background-color: #FF5722; }
   .btn-export { background-color: #795548; }
+  .btn-export-geral { background-color: #607d8b; margin-bottom: 15px; }
   td.total { font-weight: bold; }
   td[contenteditable="true"] { background: rgba(255,236,179,0.3); border: 1px dashed #ffcc00; }
   .comandaExport {
@@ -33,14 +34,17 @@
     text-align: left;
     font-size: 18px;
     font-weight: bold;
+    max-width: 700px;
   }
   .comandaExport h3 { text-align: center; }
 </style>
 </head>
 <body>
 
-<h2>Comandas Persistentes Detalhadas</h2>
+<h2>Comandas Detalhadas</h2>
 <button onclick="resetarComandas()">🔄 Resetar Todas as Comandas</button>
+<button class="btn-export-geral" onclick="exportarRelatorioGeral()">📋 Exportar Relatório Geral</button>
+
 <table id="comandaTable">
   <tr>
     <th>Nome</th>
@@ -54,6 +58,7 @@
 </table>
 
 <div id="comandaExport" class="comandaExport"></div>
+<div id="comandaExportGeral" class="comandaExport"></div>
 
 <script>
 const nomes = ["Lucas","Ana","Pedro","Maria","João","Fernanda","Carlos","Beatriz","Rafael","Julia"];
@@ -120,7 +125,7 @@ function atualizarTabela(){
         c.total += prod.valor;
         c.produtos[prod.nome]++;
         salvarComandas();
-        atualizarTabela(); // Re-renderiza para atualizar valores
+        atualizarTabela();
       });
       cell.appendChild(btn);
     });
@@ -130,7 +135,7 @@ function atualizarTabela(){
     totalCell.textContent = `R$${c.total}`;
     totalCell.className = "total";
 
-    // Exportar botão
+    // Exportar botão individual
     const exportCell = row.insertCell();
     const btnExport = document.createElement("button");
     btnExport.textContent = "Exportar PNG";
@@ -157,7 +162,7 @@ function resetarComandas(){
   }
 }
 
-// Exportar detalhado
+// Exportar detalhado individual
 function exportarComandaDetalhada(indice){
   const c = comandas[indice];
   const exportDiv = document.getElementById("comandaExport");
@@ -173,6 +178,29 @@ function exportarComandaDetalhada(indice){
   html2canvas(exportDiv).then(canvas=>{
     const link = document.createElement("a");
     link.download = `comanda_${c.numero}_${c.nome}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    exportDiv.style.display = "none";
+  });
+}
+
+// Exportar relatório geral
+function exportarRelatorioGeral(){
+  const exportDiv = document.getElementById("comandaExportGeral");
+  exportDiv.style.display = "block";
+  exportDiv.innerHTML = `<h3>Relatório Geral das Comandas</h3>
+    ${comandas.map(c=>`
+      <p>Comanda Nº ${c.numero} - ${c.nome}</p>
+      <ul>
+        ${produtosLista.map(p=>`<li>${p.nome}: ${c.produtos[p.nome]}x (R$${p.valor*c.produtos[p.nome]})</li>`).join("")}
+      </ul>
+      <p>Total: R$${c.total}</p>
+      <hr>
+    `).join("")}
+  `;
+  html2canvas(exportDiv).then(canvas=>{
+    const link = document.createElement("a");
+    link.download = `relatorio_geral_comandas.png`;
     link.href = canvas.toDataURL();
     link.click();
     exportDiv.style.display = "none";
