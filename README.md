@@ -116,12 +116,12 @@ function atualizarTabela(){
       const btn = document.createElement("button");
       btn.textContent = prod.nome;
       btn.className = `btn-${prod.nome.toLowerCase()}`;
-      btn.onclick = () => {
+      btn.addEventListener("click", () => {
         c.total += prod.valor;
         c.produtos[prod.nome]++;
         salvarComandas();
-        atualizarTabela();
-      };
+        atualizarTabela(); // Re-renderiza para atualizar valores
+      });
       cell.appendChild(btn);
     });
 
@@ -135,7 +135,7 @@ function atualizarTabela(){
     const btnExport = document.createElement("button");
     btnExport.textContent = "Exportar PNG";
     btnExport.className = "btn-export";
-    btnExport.onclick = () => exportarComandaDetalhada(index);
+    btnExport.addEventListener("click", () => exportarComandaDetalhada(index));
     exportCell.appendChild(btnExport);
   });
 }
