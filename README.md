@@ -17,6 +17,7 @@ tr:nth-child(odd){ background:#fff; }
 button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border:none; font-weight:bold; }
 .btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar,.btn-apagar,.btn-add-produto,.btn-editar-estoque,.btn-excluir-produto{ background:#ffcc00;color:#000; }
 .btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover,.btn-apagar:hover,.btn-add-produto:hover,.btn-editar-estoque:hover,.btn-excluir-produto:hover{ background:#ffb300; }
+.product-cell { color:#fff; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -38,7 +39,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
 <div class="section-container">
   <table id="comandaAbertasTable">
     <tr>
-      <th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Exportar PNG</th>
+      <th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Produtos</th>
     </tr>
   </table>
 </div>
@@ -53,6 +54,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
 </div>
 
 <script>
+let coresProdutos = ["#4CAF50","#2196F3","#FF5722","#9C27B0","#FF9800","#795548","#607D8B","#FF4081"];
 let produtosLista = [];
 if(localStorage.getItem("produtosLista")){
   produtosLista = JSON.parse(localStorage.getItem("produtosLista"));
@@ -84,42 +86,28 @@ function salvarComandas(){
 function atualizarEstoqueDiv(){
   const div=document.getElementById("estoqueDiv");
   div.innerHTML="";
+  const table=document.createElement("table");
+  const header=table.insertRow();
+  header.innerHTML="<th>Produto</th><th>Valor</th><th>Estoque</th><th>Editar</th><th>Excluir</th>";
   produtosLista.forEach((p,index)=>{
-    const span=document.createElement("span");
-    span.innerHTML=`${p.nome} (R$${p.valor}): <input type="number" value="${p.estoque}" min="0" style="width:50px;" onchange="atualizarEstoque(${index},this.value)"> 
-    <button class="btn-excluir-produto" onclick="excluirProduto(${index})">❌</button> `;
-    div.appendChild(span); div.appendChild(document.createElement("br"));
+    const row=table.insertRow();
+    row.style.background=coresProdutos[index % coresProdutos.length];
+    const cellNome=row.insertCell(); cellNome.textContent=p.nome; cellNome.className="product-cell";
+    row.insertCell().textContent=`R$${p.valor}`;
+    const estoqueCell=row.insertCell(); estoqueCell.textContent=p.estoque;
+    const editCell=row.insertCell();
+    const btnEdit=document.createElement("button"); btnEdit.textContent="✏️"; btnEdit.className="btn-editar-estoque";
+    btnEdit.onclick=()=>{
+      const novoEstoque=parseInt(prompt(`Atualizar estoque de ${p.nome}:`,p.estoque));
+      if(!isNaN(novoEstoque)){ p.estoque=novoEstoque; salvarComandas(); atualizarEstoqueDiv(); atualizarTabelas();}
+    };
+    editCell.appendChild(btnEdit);
+    const delCell=row.insertCell();
+    const btnDel=document.createElement("button"); btnDel.textContent="❌"; btnDel.className="btn-excluir-produto";
+    btnDel.onclick=()=>{ if(confirm(`Excluir produto ${p.nome}?`)){ produtosLista.splice(index,1); salvarComandas(); atualizarEstoqueDiv(); atualizarTabelas(); }};
+    delCell.appendChild(btnDel);
   });
-}
-
-function atualizarEstoque(index,valor){
-  produtosLista[index].estoque=parseInt(valor)||0;
-  salvarComandas();
-  atualizarTabelas();
-}
-
-function adicionarProduto(){
-  const nome = prompt("Digite o nome do produto:");
-  const valor = parseFloat(prompt("Digite o valor do produto:"));
-  const estoque = parseInt(prompt("Digite a quantidade em estoque:"));
-  if(nome && !isNaN(valor) && !isNaN(estoque)){
-    produtosLista.push({nome, valor, estoque});
-    salvarComandas();
-    atualizarEstoqueDiv();
-    atualizarTabelas();
-  }
-}
-
-function excluirProduto(index){
-  if(confirm(`Deseja realmente excluir o produto ${produtosLista[index].nome}?`)){
-    produtosLista.splice(index,1);
-    comandas.forEach(c=>{
-      if(c.produtos[produtosLista[index]?.nome]) delete c.produtos[produtosLista[index]?.nome];
-    });
-    salvarComandas();
-    atualizarEstoqueDiv();
-    atualizarTabelas();
-  }
+  div.appendChild(table);
 }
 
 function resetarConsumoComandas(){
@@ -133,7 +121,7 @@ function resetarConsumoComandas(){
 function atualizarTabelas(){
   const abertas = document.getElementById("comandaAbertasTable");
   const fechadas = document.getElementById("comandaFechadasTable");
-  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Exportar PNG</th></tr>`;
+  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Produtos</th></tr>`;
   fechadas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th></tr>`;
 
   comandas.forEach((c,index)=>{
@@ -150,10 +138,11 @@ function atualizarTabelas(){
       btnFinalizar.onclick=()=>{ c.fechada=true; salvarComandas(); atualizarTabelas(); exportarComandaDetalhada(index); };
       finalizarCell.appendChild(btnFinalizar);
 
-      const exportCell=row.insertCell();
-      produtosLista.forEach(prod=>{
+      const produtosCell=row.insertCell();
+      produtosLista.forEach((prod,pIndex)=>{
         const btn=document.createElement("button");
         btn.textContent=prod.nome;
+        btn.style.background=coresProdutos[pIndex%coresProdutos.length];
         btn.disabled=prod.estoque<=0;
         btn.onclick=()=>{
           if(prod.estoque>0){
@@ -163,10 +152,10 @@ function atualizarTabelas(){
             salvarComandas(); atualizarTabelas();
           }
         };
-        exportCell.appendChild(btn);
+        produtosCell.appendChild(btn);
       });
     } else {
-      row.insertCell(); // vazio para finalizar
+      row.insertCell();
       const exportCell=row.insertCell();
       const btnExport=document.createElement("button");
       btnExport.textContent="PNG"; btnExport.className="btn-export";
@@ -186,11 +175,30 @@ function adicionarComanda(){
   }
 }
 
+function adicionarProduto(){
+  const nome = prompt("Digite o nome do produto:");
+  const valor = parseFloat(prompt("Digite o valor do produto:"));
+  const estoque = parseInt(prompt("Digite a quantidade em estoque:"));
+  if(nome && !isNaN(valor) && !isNaN(estoque)){
+    produtosLista.push({nome, valor, estoque});
+    salvarComandas();
+    atualizarEstoqueDiv();
+    atualizarTabelas();
+  }
+}
+
 function exportarComandaDetalhada(index){
   const c=comandas[index];
   const div=document.createElement("div");
   div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="300px"; div.style.fontFamily="Arial";
-  div.innerHTML=`<h3>Comanda: ${c.nome} (#${c.numero})</h3>${c.fechada?'<p style="color:red;font-weight:bold;">FINALIZADA E PAGA</p>':''}<ul>${Object.entries(c.produtos).map(([k,v])=>`<li>${k}: ${v}</li>`).join('')}</ul><p>Total: R$${c.total}</p>`;
+  div.innerHTML=`<h3>Comanda #${c.numero} - ${c.nome}</h3>`;
+  div.innerHTML+=`<p>Status: ${c.fechada ? "FINALIZADA E PAGA" : "ABERTA"}</p>`;
+  div.innerHTML+="<ul>";
+  for(let p in c.produtos){
+    div.innerHTML+=`<li>${p}: ${c.produtos[p]}</li>`;
+  }
+  div.innerHTML+="</ul>";
+  div.innerHTML+=`<p><strong>Total: R$${c.total}</strong></p>`;
   document.body.appendChild(div);
   html2canvas(div).then(canvas=>{
     const link=document.createElement("a");
@@ -222,6 +230,14 @@ function gerarRelatorioGeral(){
     link.click();
     div.remove();
   });
+}
+
+function apagarComandasFechadas(){
+  if(confirm("Deseja apagar todas as comandas fechadas?")){
+    comandas = comandas.filter(c=>!c.fechada);
+    salvarComandas();
+    atualizarTabelas();
+  }
 }
 
 atualizarEstoqueDiv();
