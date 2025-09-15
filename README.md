@@ -30,12 +30,6 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
   <button class="btn-apagar" onclick="apagarComandasFechadas()">🗑️ Apagar Comandas Fechadas</button>
 </div>
 
-<h2>Gestão de Estoque</h2>
-<div style="margin-bottom:10px;">
-  <button class="btn-add-produto" onclick="adicionarProduto()">➕ Adicionar Produto</button>
-</div>
-<div id="estoqueDiv"></div>
-
 <div class="section-container">
   <table id="comandaAbertasTable">
     <tr>
@@ -52,6 +46,12 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
     </tr>
   </table>
 </div>
+
+<h2>Gestão de Estoque</h2>
+<div style="margin-bottom:10px;">
+  <button class="btn-add-produto" onclick="adicionarProduto()">➕ Adicionar Produto</button>
+</div>
+<div id="estoqueDiv"></div>
 
 <script>
 let coresProdutos = ["#4CAF50","#2196F3","#FF5722","#9C27B0","#FF9800","#795548","#607D8B","#FF4081"];
@@ -166,25 +166,21 @@ function atualizarTabelas(){
 }
 
 function adicionarComanda(){
-  const nome=prompt("Digite o nome da pessoa:");
-  const numero=parseInt(prompt("Digite o número da comanda:"));
-  if(nome && !isNaN(numero)){
-    comandas.push({nome,numero,total:0,produtos:{}, fechada:false});
-    salvarComandas();
-    atualizarTabelas();
-  }
+  const nome=prompt("Nome do cliente:"); if(!nome) return;
+  const numero=comandas.length?Math.max(...comandas.map(c=>c.numero))+1:1;
+  comandas.push({nome, numero, total:0, produtos:{}, fechada:false});
+  salvarComandas();
+  atualizarTabelas();
 }
 
 function adicionarProduto(){
-  const nome = prompt("Digite o nome do produto:");
-  const valor = parseFloat(prompt("Digite o valor do produto:"));
-  const estoque = parseInt(prompt("Digite a quantidade em estoque:"));
-  if(nome && !isNaN(valor) && !isNaN(estoque)){
-    produtosLista.push({nome, valor, estoque});
-    salvarComandas();
-    atualizarEstoqueDiv();
-    atualizarTabelas();
-  }
+  const nome=prompt("Nome do produto:"); if(!nome) return;
+  const valor=parseFloat(prompt("Valor do produto:")); if(isNaN(valor)) return alert("Valor inválido");
+  const estoque=parseInt(prompt("Quantidade em estoque:")); if(isNaN(estoque)) return alert("Estoque inválido");
+  produtosLista.push({nome, valor, estoque});
+  salvarComandas();
+  atualizarEstoqueDiv();
+  atualizarTabelas();
 }
 
 function exportarComandaDetalhada(index){
@@ -194,9 +190,7 @@ function exportarComandaDetalhada(index){
   div.innerHTML=`<h3>Comanda #${c.numero} - ${c.nome}</h3>`;
   div.innerHTML+=`<p>Status: ${c.fechada ? "FINALIZADA E PAGA" : "ABERTA"}</p>`;
   div.innerHTML+="<ul>";
-  for(let p in c.produtos){
-    div.innerHTML+=`<li>${p}: ${c.produtos[p]}</li>`;
-  }
+  for(let p in c.produtos){ div.innerHTML+=`<li>${p}: ${c.produtos[p]}</li>`; }
   div.innerHTML+="</ul>";
   div.innerHTML+=`<p><strong>Total: R$${c.total}</strong></p>`;
   document.body.appendChild(div);
@@ -213,8 +207,7 @@ function gerarRelatorioGeral(){
   const div=document.createElement("div");
   div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="400px"; div.style.fontFamily="Arial";
   div.innerHTML="<h3>Relatório Geral</h3>";
-  let totalGeral=0;
-  let produtosTotais={};
+  let totalGeral=0; let produtosTotais={};
   comandas.filter(c=>c.fechada).forEach(c=>{
     div.innerHTML+=`<p>${c.nome} (#${c.numero}) - Total R$${c.total}</p>`;
     totalGeral+=c.total;
@@ -234,7 +227,7 @@ function gerarRelatorioGeral(){
 
 function apagarComandasFechadas(){
   if(confirm("Deseja apagar todas as comandas fechadas?")){
-    comandas = comandas.filter(c=>!c.fechada);
+    comandas=comandas.filter(c=>!c.fechada);
     salvarComandas();
     atualizarTabelas();
   }
