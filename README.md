@@ -18,8 +18,8 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
 .btn-refri { background:#4CAF50;color:#fff; }
 .btn-cerveja { background:#2196F3;color:#fff; }
 .btn-comida { background:#FF9800;color:#fff; }
-.btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar{ background:#ffcc00;color:#000; }
-.btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover{ background:#ffb300; }
+.btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar,.btn-apagar{ background:#ffcc00;color:#000; }
+.btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover,.btn-apagar:hover{ background:#ffb300; }
 .section-container { width: 95%; margin-bottom: 30px;}
 </style>
 </head>
@@ -30,6 +30,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
   <button class="btn-add" onclick="adicionarComanda()">➕ Adicionar Nova Comanda</button>
   <button class="btn-reset" onclick="resetarConsumoComandas()">🔄 Resetar Consumo</button>
   <button class="btn-geral" onclick="gerarRelatorioGeral()">📊 Gerar Relatório Geral</button>
+  <button class="btn-apagar" onclick="apagarComandasFechadas()">🗑️ Apagar Comandas Fechadas</button>
 </div>
 <div class="section-container">
   <table id="comandaAbertasTable">
@@ -160,7 +161,7 @@ function exportarComandaDetalhada(index){
   });
 }
 
-// NOVO: Função para gerar relatório geral
+// Função para gerar relatório geral
 function gerarRelatorioGeral(){
   const fechadas = comandas.filter(c=>c.fechada);
   if(fechadas.length===0){ alert("Não há comandas fechadas para gerar relatório."); return; }
@@ -190,6 +191,15 @@ function gerarRelatorioGeral(){
     link.click();
     div.remove();
   });
+}
+
+// NOVO: Apagar todas as comandas fechadas
+function apagarComandasFechadas(){
+  if(confirm("Deseja realmente apagar todas as comandas fechadas? Esta ação não pode ser desfeita.")){
+    comandas = comandas.filter(c=>!c.fechada);
+    salvarComandas();
+    atualizarTabelas();
+  }
 }
 
 atualizarTabelas();
