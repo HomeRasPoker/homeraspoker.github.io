@@ -18,11 +18,11 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; font-w
 .btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar,.btn-apagar,.btn-add-produto,.btn-editar-estoque,.btn-excluir-produto{ background:#ffcc00;color:#000; }
 .btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover,.btn-apagar:hover,.btn-add-produto:hover,.btn-editar-estoque:hover,.btn-excluir-produto:hover{ background:#ffb300; }
 .product-cell { font-weight:bold; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin:1px; }
-.product-btn { padding:4px 8px; margin:2px; border-radius:4px; font-weight:bold; color:#fff; border:none; cursor:pointer; }
-.product-container { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; }
+.product-btn { padding:2px 4px; margin:1px; border-radius:3px; font-weight:bold; font-size:12px; color:#fff; border:none; cursor:pointer; }
+.product-container { display:flex; flex-wrap:wrap; justify-content:center; gap:2px; }
 .status-aberta { background:#81d4fa; }
 .status-fechada { background:#ff8a80; }
-.produtos-vendidos span { margin:0 2px; padding:2px 4px; border-radius:3px; color:#fff; font-weight:bold; display:inline-block; }
+.produtos-vendidos span { margin:0 2px; padding:2px 4px; border-radius:3px; color:#fff; font-weight:bold; display:inline-block; font-size:12px; }
 </style>
 </head>
 <body>
@@ -36,7 +36,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; font-w
 </div>
 
 <table id="comandaAbertasTable">
-  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th></tr>
+  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th><th>Vendidos</th></tr>
 </table>
 
 <h2>Comandas Fechadas</h2>
@@ -127,7 +127,7 @@ function resetarConsumoComandas(){
 function atualizarTabelas(){
   const abertas = document.getElementById("comandaAbertasTable");
   const fechadas = document.getElementById("comandaFechadasTable");
-  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th></tr>`;
+  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th><th>Vendidos</th></tr>`;
   fechadas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th></tr>`;
 
   comandas.forEach((c,index)=>{
