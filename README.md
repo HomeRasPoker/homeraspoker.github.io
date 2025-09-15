@@ -2,22 +2,26 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Comandas Abertas e Fechadas com Estoque Dinâmico</title>
+<title>Comandas - Sistema Visual</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; display:flex; flex-direction: column; align-items: center;}
-h2 { color:#333; }
-table { border-collapse: collapse; width: 90%; margin-bottom: 20px;}
+body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; display:flex; flex-direction: column; align-items: center; }
+h2 { color:#333; margin-bottom:10px; }
+table { border-collapse: collapse; width: 90%; margin-bottom: 20px; }
 th, td { border:1px solid #888; padding:6px 10px; text-align:center; }
 th { background:#ffcc00; color:#000; }
 td { color:#000; }
 td[contenteditable="true"] { background:#fffae5; border:1px dashed #ffcc00; }
 tr:nth-child(even){ background:#fdf5e6; }
 tr:nth-child(odd){ background:#fff; }
-button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border:none; font-weight:bold; }
+button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; font-weight:bold; border:none; }
 .btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar,.btn-apagar,.btn-add-produto,.btn-editar-estoque,.btn-excluir-produto{ background:#ffcc00;color:#000; }
 .btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover,.btn-apagar:hover,.btn-add-produto:hover,.btn-editar-estoque:hover,.btn-excluir-produto:hover{ background:#ffb300; }
-.product-cell { color:#fff; font-weight:bold; }
+.product-cell { font-weight:bold; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin:1px; }
+.product-btn { padding:4px 8px; margin:2px; border-radius:4px; font-weight:bold; color:#fff; border:none; cursor:pointer; }
+.product-container { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; }
+.status-aberta { background:#81d4fa; }
+.status-fechada { background:#ff8a80; }
 </style>
 </head>
 <body>
@@ -30,22 +34,14 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
   <button class="btn-apagar" onclick="apagarComandasFechadas()">🗑️ Apagar Comandas Fechadas</button>
 </div>
 
-<div class="section-container">
-  <table id="comandaAbertasTable">
-    <tr>
-      <th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Produtos</th>
-    </tr>
-  </table>
-</div>
+<table id="comandaAbertasTable">
+  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Produtos</th></tr>
+</table>
 
 <h2>Comandas Fechadas</h2>
-<div class="section-container">
-  <table id="comandaFechadasTable">
-    <tr>
-      <th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th>
-    </tr>
-  </table>
-</div>
+<table id="comandaFechadasTable">
+  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th></tr>
+</table>
 
 <h2>Gestão de Estoque</h2>
 <div style="margin-bottom:10px;">
@@ -112,9 +108,18 @@ function atualizarEstoqueDiv(){
 
 function resetarConsumoComandas(){
   if(confirm("Deseja realmente resetar o consumo de todas as comandas abertas?")){
-    comandas.forEach(c=>{ if(!c.fechada){ c.total=0; c.produtos={}; } });
+    comandas.forEach(c=>{
+      if(!c.fechada){
+        for(let p in c.produtos){
+          const prod = produtosLista.find(x=>x.nome===p);
+          if(prod) prod.estoque += c.produtos[p];
+        }
+        c.total=0; c.produtos={};
+      }
+    });
     salvarComandas();
     atualizarTabelas();
+    atualizarEstoqueDiv();
   }
 }
 
@@ -139,44 +144,50 @@ function atualizarTabelas(){
       finalizarCell.appendChild(btnFinalizar);
 
       const produtosCell=row.insertCell();
-      produtosLista.forEach((prod,pIndex)=>{
+      produtosCell.className="product-container";
+      produtosLista.forEach((prod,pindex)=>{
         const btn=document.createElement("button");
-        btn.textContent=prod.nome;
-        btn.style.background=coresProdutos[pIndex%coresProdutos.length];
-        btn.disabled=prod.estoque<=0;
+        btn.textContent=`${prod.nome} (+R$${prod.valor})`;
+        btn.className="product-btn"; btn.style.background=coresProdutos[pindex % coresProdutos.length];
+        btn.disabled = prod.estoque<=0;
         btn.onclick=()=>{
           if(prod.estoque>0){
-            c.produtos[prod.nome]=c.produtos[prod.nome]?c.produtos[prod.nome]+1:1;
+            c.produtos[prod.nome]=(c.produtos[prod.nome]||0)+1;
             c.total+=prod.valor;
             prod.estoque--;
-            salvarComandas(); atualizarTabelas();
+            salvarComandas();
+            atualizarTabelas();
+            atualizarEstoqueDiv();
           }
         };
         produtosCell.appendChild(btn);
       });
     } else {
-      row.insertCell();
-      const exportCell=row.insertCell();
-      const btnExport=document.createElement("button");
-      btnExport.textContent="PNG"; btnExport.className="btn-export";
-      btnExport.onclick=()=>exportarComandaDetalhada(index);
-      exportCell.appendChild(btnExport);
+      const pngCell=row.insertCell();
+      const btnPNG=document.createElement("button"); btnPNG.textContent="📷 PNG"; btnPNG.className="btn-export";
+      btnPNG.onclick=()=>exportarComandaDetalhada(index);
+      pngCell.appendChild(btnPNG);
     }
   });
 }
 
 function adicionarComanda(){
-  const nome=prompt("Nome do cliente:"); if(!nome) return;
-  const numero=comandas.length?Math.max(...comandas.map(c=>c.numero))+1:1;
-  comandas.push({nome, numero, total:0, produtos:{}, fechada:false});
+  let nome=prompt("Nome do cliente:");
+  if(!nome) return;
+  let numero=prompt("Número da comanda:",comandas.length?Math.max(...comandas.map(c=>c.numero))+1:1);
+  if(isNaN(numero) || numero==="") numero=comandas.length?Math.max(...comandas.map(c=>c.numero))+1:1;
+  comandas.push({nome, numero:parseInt(numero), total:0, produtos:{}, fechada:false});
   salvarComandas();
   atualizarTabelas();
 }
 
 function adicionarProduto(){
-  const nome=prompt("Nome do produto:"); if(!nome) return;
-  const valor=parseFloat(prompt("Valor do produto:")); if(isNaN(valor)) return alert("Valor inválido");
-  const estoque=parseInt(prompt("Quantidade em estoque:")); if(isNaN(estoque)) return alert("Estoque inválido");
+  let nome=prompt("Nome do produto:");
+  if(!nome) return;
+  let valor=parseFloat(prompt("Valor do produto:"));
+  if(isNaN(valor)) return alert("Valor inválido");
+  let estoque=parseInt(prompt("Quantidade em estoque:"));
+  if(isNaN(estoque)) return alert("Estoque inválido");
   produtosLista.push({nome, valor, estoque});
   salvarComandas();
   atualizarEstoqueDiv();
