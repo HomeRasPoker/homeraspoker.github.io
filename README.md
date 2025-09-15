@@ -148,6 +148,7 @@ function exportarComandaDetalhada(index){
   const div=document.createElement("div");
   div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="300px"; div.style.fontFamily="Arial";
   div.innerHTML=`<h3>Comanda: ${c.nome} (#${c.numero})</h3>
+    ${c.fechada ? '<p style="color:red;font-weight:bold;">FINALIZADA E PAGA</p>' : ''}
     <p>Consumo Detalhado:</p>
     <ul>${produtosLista.map(p=>`<li>${p.nome}: ${c.produtos[p.nome]}</li>`).join('')}</ul>
     <p><b>Total: R$${c.total}</b></p>`;
@@ -193,7 +194,7 @@ function gerarRelatorioGeral(){
   });
 }
 
-// NOVO: Apagar todas as comandas fechadas
+// Apagar todas as comandas fechadas
 function apagarComandasFechadas(){
   if(confirm("Deseja realmente apagar todas as comandas fechadas? Esta ação não pode ser desfeita.")){
     comandas = comandas.filter(c=>!c.fechada);
