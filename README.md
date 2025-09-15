@@ -22,6 +22,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; font-w
 .product-container { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; }
 .status-aberta { background:#81d4fa; }
 .status-fechada { background:#ff8a80; }
+.produtos-vendidos span { margin:0 2px; padding:2px 4px; border-radius:3px; color:#fff; font-weight:bold; display:inline-block; }
 </style>
 </head>
 <body>
@@ -35,7 +36,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; font-w
 </div>
 
 <table id="comandaAbertasTable">
-  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Produtos</th></tr>
+  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th></tr>
 </table>
 
 <h2>Comandas Fechadas</h2>
@@ -126,7 +127,7 @@ function resetarConsumoComandas(){
 function atualizarTabelas(){
   const abertas = document.getElementById("comandaAbertasTable");
   const fechadas = document.getElementById("comandaFechadasTable");
-  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>Produtos</th></tr>`;
+  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th></tr>`;
   fechadas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th></tr>`;
 
   comandas.forEach((c,index)=>{
@@ -140,15 +141,20 @@ function atualizarTabelas(){
       const finalizarCell=row.insertCell();
       const btnFinalizar=document.createElement("button");
       btnFinalizar.textContent="Finalizar"; btnFinalizar.className="btn-fechar";
-      btnFinalizar.onclick=()=>{ c.fechada=true; salvarComandas(); atualizarTabelas(); exportarComandaDetalhada(index); };
+      btnFinalizar.onclick=()=>{ c.fechada=true; salvarComandas(); atualizarTabelas(); exportarComandaDetalhada(index,true); };
       finalizarCell.appendChild(btnFinalizar);
 
-      const produtosCell=row.insertCell();
-      produtosCell.className="product-container";
-      produtosLista.forEach((prod,pindex)=>{
+      const pngCell=row.insertCell();
+      const btnPNG=document.createElement("button"); btnPNG.textContent="📷 PNG"; btnPNG.className="btn-export";
+      btnPNG.onclick=()=>exportarComandaDetalhada(index,false);
+      pngCell.appendChild(btnPNG);
+
+      const prodCell=row.insertCell(); 
+      const divProdutos=document.createElement("div"); divProdutos.className="product-container";
+      produtosLista.forEach((prod,pIndex)=>{
         const btn=document.createElement("button");
         btn.textContent=`${prod.nome} (+R$${prod.valor})`;
-        btn.className="product-btn"; btn.style.background=coresProdutos[pindex % coresProdutos.length];
+        btn.className="product-btn"; btn.style.background=coresProdutos[pIndex % coresProdutos.length];
         btn.disabled = prod.estoque<=0;
         btn.onclick=()=>{
           if(prod.estoque>0){
@@ -160,12 +166,24 @@ function atualizarTabelas(){
             atualizarEstoqueDiv();
           }
         };
-        produtosCell.appendChild(btn);
+        divProdutos.appendChild(btn);
       });
+      prodCell.appendChild(divProdutos);
+
+      const vendidosDiv=row.insertCell();
+      vendidosDiv.className="produtos-vendidos";
+      for(let p in c.produtos){
+        const span=document.createElement("span");
+        const idx = produtosLista.findIndex(x=>x.nome===p);
+        span.style.background=coresProdutos[idx % coresProdutos.length];
+        span.textContent=`${p}: ${c.produtos[p]}`;
+        vendidosDiv.appendChild(span);
+      }
+
     } else {
       const pngCell=row.insertCell();
       const btnPNG=document.createElement("button"); btnPNG.textContent="📷 PNG"; btnPNG.className="btn-export";
-      btnPNG.onclick=()=>exportarComandaDetalhada(index);
+      btnPNG.onclick=()=>exportarComandaDetalhada(index,true);
       pngCell.appendChild(btnPNG);
     }
   });
@@ -194,22 +212,20 @@ function adicionarProduto(){
   atualizarTabelas();
 }
 
-function exportarComandaDetalhada(index){
+function exportarComandaDetalhada(index,finalizada=false){
   const c=comandas[index];
   const div=document.createElement("div");
-  div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="300px"; div.style.fontFamily="Arial";
+  div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="350px"; div.style.fontFamily="Arial";
   div.innerHTML=`<h3>Comanda #${c.numero} - ${c.nome}</h3>`;
-  div.innerHTML+=`<p>Status: ${c.fechada ? "FINALIZADA E PAGA" : "ABERTA"}</p>`;
+  div.innerHTML+=`<p>Status: ${finalizada ? "FINALIZADA E PAGA" : "ABERTA"}</p>`;
   div.innerHTML+="<ul>";
   for(let p in c.produtos){ div.innerHTML+=`<li>${p}: ${c.produtos[p]}</li>`; }
   div.innerHTML+="</ul>";
   div.innerHTML+=`<p><strong>Total: R$${c.total}</strong></p>`;
   document.body.appendChild(div);
   html2canvas(div).then(canvas=>{
-    const link=document.createElement("a");
-    link.download=`comanda_${c.numero}.png`;
-    link.href=canvas.toDataURL();
-    link.click();
+    const win = window.open();
+    win.document.body.appendChild(canvas);
     div.remove();
   });
 }
