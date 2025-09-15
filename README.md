@@ -21,6 +21,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
 .btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar,.btn-apagar{ background:#ffcc00;color:#000; }
 .btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover,.btn-apagar:hover{ background:#ffb300; }
 .section-container { width: 95%; margin-bottom: 30px;}
+#estoqueDiv { margin-bottom: 20px; }
 </style>
 </head>
 <body>
@@ -32,6 +33,11 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
   <button class="btn-geral" onclick="gerarRelatorioGeral()">📊 Gerar Relatório Geral</button>
   <button class="btn-apagar" onclick="apagarComandasFechadas()">🗑️ Apagar Comandas Fechadas</button>
 </div>
+
+<div id="estoqueDiv">
+  <strong>Estoque:</strong> Refri: <span id="estoqueRefri">20</span>, Cerveja: <span id="estoqueCerveja">15</span>, Comida: <span id="estoqueComida">10</span>
+</div>
+
 <div class="section-container">
   <table id="comandaAbertasTable">
     <tr>
@@ -51,9 +57,9 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
 
 <script>
 const produtosLista = [
-  {nome:"Refri", valor:5},
-  {nome:"Cerveja", valor:15},
-  {nome:"Comida", valor:25}
+  {nome:"Refri", valor:5, estoque:20},
+  {nome:"Cerveja", valor:15, estoque:15},
+  {nome:"Comida", valor:25, estoque:10}
 ];
 
 let comandas = [];
@@ -67,7 +73,28 @@ if(localStorage.getItem("comandas")){
   salvarComandas();
 }
 
-function salvarComandas(){ localStorage.setItem("comandas",JSON.stringify(comandas)); }
+function salvarComandas(){ 
+  localStorage.setItem("comandas",JSON.stringify(comandas)); 
+  localStorage.setItem("estoque",JSON.stringify(produtosLista));
+}
+
+function carregarEstoque(){
+  if(localStorage.getItem("estoque")){
+    const estoqueSalvo = JSON.parse(localStorage.getItem("estoque"));
+    produtosLista.forEach(p=>{
+      const e = estoqueSalvo.find(es=>es.nome===p.nome);
+      if(e) p.estoque = e.estoque;
+    });
+  }
+}
+
+carregarEstoque();
+
+function atualizarEstoqueDiv(){
+  document.getElementById("estoqueRefri").textContent=produtosLista.find(p=>p.nome==="Refri").estoque;
+  document.getElementById("estoqueCerveja").textContent=produtosLista.find(p=>p.nome==="Cerveja").estoque;
+  document.getElementById("estoqueComida").textContent=produtosLista.find(p=>p.nome==="Comida").estoque;
+}
 
 function resetarConsumoComandas(){
   if(confirm("Deseja realmente resetar o consumo de todas as comandas abertas?")){
@@ -78,6 +105,7 @@ function resetarConsumoComandas(){
 }
 
 function atualizarTabelas(){
+  atualizarEstoqueDiv();
   const abertas = document.getElementById("comandaAbertasTable");
   const fechadas = document.getElementById("comandaFechadasTable");
   abertas.innerHTML=`<tr>
@@ -99,7 +127,14 @@ function atualizarTabelas(){
         const btn=document.createElement("button");
         btn.textContent=prod.nome;
         btn.className=`btn-${prod.nome.toLowerCase()}`;
-        btn.onclick=()=>{ c.total+=prod.valor; c.produtos[prod.nome]++; salvarComandas(); atualizarTabelas(); };
+        if(prod.estoque<=0){ btn.disabled=true; }
+        btn.onclick=()=>{
+          if(prod.estoque>0){
+            c.total+=prod.valor; c.produtos[prod.nome]++;
+            prod.estoque--;
+            salvarComandas(); atualizarTabelas();
+          }
+        };
         cell.appendChild(btn);
       } else {
         cell.textContent=c.produtos[prod.nome];
