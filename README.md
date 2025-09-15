@@ -29,6 +29,7 @@ button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; border
 <div style="margin-bottom:10px;">
   <button class="btn-add" onclick="adicionarComanda()">➕ Adicionar Nova Comanda</button>
   <button class="btn-reset" onclick="resetarConsumoComandas()">🔄 Resetar Consumo</button>
+  <button class="btn-geral" onclick="gerarRelatorioGeral()">📊 Gerar Relatório Geral</button>
 </div>
 <div class="section-container">
   <table id="comandaAbertasTable">
@@ -65,9 +66,7 @@ if(localStorage.getItem("comandas")){
   salvarComandas();
 }
 
-function salvarComandas(){
-  localStorage.setItem("comandas",JSON.stringify(comandas));
-}
+function salvarComandas(){ localStorage.setItem("comandas",JSON.stringify(comandas)); }
 
 function resetarConsumoComandas(){
   if(confirm("Deseja realmente resetar o consumo de todas as comandas abertas?")){
@@ -92,7 +91,7 @@ function atualizarTabelas(){
     const row = table.insertRow();
     const nomeCell = row.insertCell(); nomeCell.textContent=c.nome; nomeCell.contentEditable=!c.fechada; nomeCell.onblur=()=>{c.nome=nomeCell.textContent; salvarComandas();}
     const numCell = row.insertCell(); numCell.textContent=c.numero; numCell.contentEditable=!c.fechada; numCell.onblur=()=>{ const n=parseInt(numCell.textContent); c.numero=isNaN(n)?c.numero:n; salvarComandas(); }
-    
+
     produtosLista.forEach(prod=>{
       const cell=row.insertCell();
       if(!c.fechada){
@@ -105,6 +104,7 @@ function atualizarTabelas(){
         cell.textContent=c.produtos[prod.nome];
       }
     });
+
     const totalCell=row.insertCell(); totalCell.textContent=`R$${c.total}`;
 
     if(!c.fechada){
@@ -160,8 +160,39 @@ function exportarComandaDetalhada(index){
   });
 }
 
+// NOVO: Função para gerar relatório geral
+function gerarRelatorioGeral(){
+  const fechadas = comandas.filter(c=>c.fechada);
+  if(fechadas.length===0){ alert("Não há comandas fechadas para gerar relatório."); return; }
+
+  let totalRefri=0, totalCerveja=0, totalComida=0, totalGeral=0;
+  fechadas.forEach(c=>{
+    totalRefri+=c.produtos.Refri;
+    totalCerveja+=c.produtos.Cerveja;
+    totalComida+=c.produtos.Comida;
+    totalGeral+=c.total;
+  });
+
+  const div=document.createElement("div");
+  div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="350px"; div.style.fontFamily="Arial";
+  div.innerHTML=`<h3>Relatório Geral</h3>
+    <ul>
+      <li>Total Refri: ${totalRefri} unidades</li>
+      <li>Total Cerveja: ${totalCerveja} unidades</li>
+      <li>Total Comida: ${totalComida} unidades</li>
+    </ul>
+    <p><b>Total Arrecadado: R$${totalGeral}</b></p>`;
+  document.body.appendChild(div);
+  html2canvas(div).then(canvas=>{
+    const link=document.createElement("a");
+    link.download="relatorio_geral.png";
+    link.href=canvas.toDataURL();
+    link.click();
+    div.remove();
+  });
+}
+
 atualizarTabelas();
 </script>
-
 </body>
 </html>
