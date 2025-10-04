@@ -7,94 +7,111 @@
 <style>
   body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f0e6d2, #b28b5a);
+    background: url('https://i.imgur.com/SGbM7aF.jpg') no-repeat center center fixed;
+    background-size: cover;
     margin: 0;
     padding: 20px;
-    color: #333;
+    color: #fff;
   }
-  h1 {
-    text-align: center;
-    color: #2e2e2e;
-  }
+
   .container {
     max-width: 600px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 25px;
+    margin: auto;
+    background: rgba(60, 40, 20, 0.9);
     border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    padding: 25px;
+    text-align: center;
   }
+
+  h1 {
+    color: #d4af37;
+    text-shadow: 2px 2px 4px #000;
+  }
+
   label {
     font-weight: bold;
+    font-size: 16px;
+    color: #f8f8f8;
   }
+
   input {
     width: 100%;
     padding: 10px;
-    margin: 8px 0 15px;
-    border-radius: 10px;
-    border: 1px solid #bbb;
+    margin: 10px 0 20px;
+    border-radius: 8px;
+    border: 1px solid #d4af37;
     font-size: 16px;
+    text-align: center;
   }
+
   button {
     width: 100%;
     padding: 12px;
-    margin-top: 10px;
     border: none;
     border-radius: 10px;
     font-size: 16px;
+    font-weight: bold;
+    color: #fff;
     cursor: pointer;
     transition: 0.3s;
+    margin-top: 10px;
   }
-  #calcular {
-    background-color: #4CAF50;
-    color: white;
+
+  #calcular { background-color: #388e3c; }
+  #salvarQuinto { background-color: #c49102; }
+  #desfazerQuinto { background-color: #a93226; }
+
+  button:hover {
+    opacity: 0.9;
+    transform: scale(1.03);
   }
-  #salvarQuinto {
-    background-color: #007bff;
-    color: white;
-  }
-  #desfazerQuinto {
-    background-color: #d9534f;
-    color: white;
-  }
+
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    overflow: hidden;
   }
+
   th, td {
-    border: 1px solid #ccc;
+    border: 1px solid #d4af37;
     padding: 12px;
     text-align: center;
-    color: #000; /* letras pretas e bem visíveis */
+    color: #000; /* Letras pretas */
+    font-weight: bold;
   }
+
   th {
-    background-color: #f4f4f4;
-    font-weight: bold;
+    background-color: #d4af37;
+    color: #000;
   }
+
   .resultado {
-    margin-top: 15px;
-    text-align: center;
+    margin-top: 20px;
     font-weight: bold;
+    color: #f8f8f8;
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Divisão de Premiação</h1>
-    <label for="valorTotal">Valor total arrecadado (R$):</label>
-    <input type="number" id="valorTotal" placeholder="Digite o valor total">
-    <button id="calcular">Calcular Divisão</button>
-    <button id="salvarQuinto" disabled>Salvar o Quinto</button>
-    <button id="desfazerQuinto" disabled>Desfazer Quinto</button>
 
-    <div id="resultado" class="resultado"></div>
-  </div>
+<div class="container">
+  <h1>Divisão de Premiação</h1>
+  <label for="valorTotal">Valor total arrecadado (R$):</label>
+  <input type="number" id="valorTotal" placeholder="Digite o valor total">
+  <button id="calcular">Calcular Divisão</button>
+  <button id="salvarQuinto" disabled>Salvar o Quinto</button>
+  <button id="desfazerQuinto" disabled>Desfazer Quinto</button>
+
+  <div id="resultado" class="resultado"></div>
+</div>
 
 <script>
 let premiosOriginais = {};
 let quintoAdicionado = false;
-let valorQuinto = 0;
 
 document.getElementById('calcular').addEventListener('click', () => {
   const total = parseFloat(document.getElementById('valorTotal').value);
@@ -114,7 +131,7 @@ document.getElementById('calcular').addEventListener('click', () => {
   let p3 = restante * 0.15;
   let p4 = restante * 0.10;
 
-  // Arredondamento e ajuste de sobras
+  // Arredondar para múltiplos de 10
   p1 = Math.round(p1 / 10) * 10;
   p2 = Math.round(p2 / 10) * 10;
   p3 = Math.round(p3 / 10) * 10;
@@ -127,7 +144,6 @@ document.getElementById('calcular').addEventListener('click', () => {
 
   premiosOriginais = { total, casa, porquinho: porquinhoFinal, p1, p2, p3, p4 };
   quintoAdicionado = false;
-  valorQuinto = 0;
 
   mostrarTabela(premiosOriginais);
   document.getElementById('salvarQuinto').disabled = false;
@@ -141,33 +157,52 @@ document.getElementById('salvarQuinto').addEventListener('click', () => {
   }
 
   let { total, casa, porquinho, p1, p2, p3, p4 } = premiosOriginais;
-  const salvarValor = total < 1000 ? 40 : 100; // valor total a ser redistribuído
 
-  // Divisão fixa (70 e 30)
-  const tirarP1 = 70;
-  const tirarP2 = 30;
-  const quinto = tirarP1 + tirarP2;
+  // Decide valor e diluição padrão
+  const valorQuinto = total < 1000 ? 40 : 80;
+  const tirarPorPosicao = total < 1000 ? 10 : 20;
 
-  // Garantir que não quebre a regra
-  const novoP1 = p1 - tirarP1;
-  const novoP2 = p2 - tirarP2;
-  const novoP3 = p3;
-  const novoP4 = p4;
+  const novoP1 = p1 - tirarPorPosicao;
+  const novoP2 = p2 - tirarPorPosicao;
+  const novoP3 = p3 - tirarPorPosicao;
+  const novoP4 = p4 - tirarPorPosicao;
 
-  if (quinto >= novoP4) {
-    alert("Não é possível salvar o quinto — valor igual ou maior que o quarto lugar.");
-    return;
+  const p5 = valorQuinto;
+
+  if (p5 >= novoP4) {
+    // Caso não seja possível salvar convencionalmente
+    const confirmar = confirm("Não é possível salvar o quinto da forma convencional.\nDeseja salvar com valor fixo de R$ 40?");
+    if (confirmar) {
+      const novoP1_alt = p1 - 20;
+      const novoP2_alt = p2 - 20;
+      const p5_alt = 40;
+
+      if (p5_alt >= p4) {
+        alert("Mesmo com valor fixo, o quinto ficaria igual ou maior que o quarto. Ação cancelada.");
+        return;
+      }
+
+      // Mantém o total distribuído igual
+      const distribuidoAntigo = p1 + p2 + p3 + p4;
+      const distribuidoNovo = novoP1_alt + novoP2_alt + p3 + p4 + p5_alt;
+      const ajuste = distribuidoAntigo - distribuidoNovo;
+      porquinho += ajuste;
+
+      premiosOriginais = { total, casa, porquinho, p1: novoP1_alt, p2: novoP2_alt, p3, p4, p5: p5_alt };
+      quintoAdicionado = true;
+    } else {
+      return;
+    }
+  } else {
+    // Forma convencional aceita
+    const distribuidoAntigo = p1 + p2 + p3 + p4;
+    const distribuidoNovo = novoP1 + novoP2 + novoP3 + novoP4 + p5;
+    const ajuste = distribuidoAntigo - distribuidoNovo;
+    porquinho += ajuste;
+
+    premiosOriginais = { total, casa, porquinho, p1: novoP1, p2: novoP2, p3: novoP3, p4: novoP4, p5 };
+    quintoAdicionado = true;
   }
-
-  // Mantém o total distribuído igual
-  const distribuidoAntigo = p1 + p2 + p3 + p4;
-  const distribuidoNovo = novoP1 + novoP2 + novoP3 + novoP4 + quinto;
-  const ajuste = distribuidoAntigo - distribuidoNovo;
-  porquinho += ajuste;
-
-  premiosOriginais = { total, casa, porquinho, p1: novoP1, p2: novoP2, p3: novoP3, p4: novoP4, p5: quinto };
-  quintoAdicionado = true;
-  valorQuinto = quinto;
 
   mostrarTabela(premiosOriginais);
   document.getElementById('salvarQuinto').disabled = true;
@@ -179,12 +214,7 @@ document.getElementById('desfazerQuinto').addEventListener('click', () => {
     alert("Nenhum quinto foi salvo ainda.");
     return;
   }
-
-  const { p1, p2, p3, p4, total, casa, porquinho } = premiosOriginais;
-  // Restaura para valores originais (sem quinto)
   document.getElementById('calcular').click();
-  document.getElementById('salvarQuinto').disabled = false;
-  document.getElementById('desfazerQuinto').disabled = true;
 });
 
 function mostrarTabela({ total, casa, porquinho, p1, p2, p3, p4, p5 }) {
