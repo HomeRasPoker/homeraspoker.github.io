@@ -54,6 +54,9 @@
     width: 100%;
     margin-top: 15px;
     border-collapse: collapse;
+    background: #f0c674;
+    border-radius: 10px;
+    overflow: hidden;
   }
   th, td {
     padding: 10px;
@@ -64,11 +67,12 @@
     color: #fff;
   }
   td {
-    color: #ffd55c; /* amarelo mais escuro e forte */
+    color: #000; /* letras pretas */
     font-weight: 600;
+    background: #ffdf91;
   }
-  tr:nth-child(even) {
-    background: #4a4a4a;
+  tr:nth-child(even) td {
+    background: #f7d57f;
   }
   .extra-info {
     margin-top: 15px;
@@ -192,7 +196,7 @@
     const valorQuinto = premioTotalGlobal < 1000 ? 40 : 80;
     const desconto = valorQuinto / 4; // divide proporcionalmente entre os 4 primeiros
 
-    // Realoca sem reduzir total
+    // Realoca sem reduzir o total distribuído
     valores.p1 -= desconto;
     valores.p2 -= desconto;
     valores.p3 -= desconto;
