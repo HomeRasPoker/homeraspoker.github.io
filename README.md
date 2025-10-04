@@ -7,33 +7,33 @@
 <style>
   body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #2b2b2b, #60492c);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px;
+    background: linear-gradient(135deg, #f0e6d2, #b28b5a);
+    margin: 0;
+    padding: 20px;
+    color: #333;
   }
   h1 {
-    margin-bottom: 20px;
-    color: #f0c674;
-    text-shadow: 1px 1px 3px #000;
+    text-align: center;
+    color: #2e2e2e;
   }
   .container {
-    background: #3a3a3a;
-    border-radius: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
     padding: 25px;
-    width: 95%;
-    max-width: 550px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   }
-  input[type="number"] {
+  label {
+    font-weight: bold;
+  }
+  input {
     width: 100%;
     padding: 10px;
-    border: none;
+    margin: 8px 0 15px;
     border-radius: 10px;
-    margin-bottom: 20px;
-    font-size: 1rem;
+    border: 1px solid #bbb;
+    font-size: 16px;
   }
   button {
     width: 100%;
@@ -41,176 +41,166 @@
     margin-top: 10px;
     border: none;
     border-radius: 10px;
-    background: #f0c674;
-    color: #000;
-    font-size: 1.1rem;
+    font-size: 16px;
     cursor: pointer;
     transition: 0.3s;
   }
-  button:hover {
-    background: #ffdf91;
+  #calcular {
+    background-color: #4CAF50;
+    color: white;
+  }
+  #salvarQuinto {
+    background-color: #007bff;
+    color: white;
+  }
+  #desfazerQuinto {
+    background-color: #d9534f;
+    color: white;
   }
   table {
     width: 100%;
-    margin-top: 15px;
     border-collapse: collapse;
-    background: #f0c674;
-    border-radius: 10px;
-    overflow: hidden;
+    margin-top: 20px;
   }
   th, td {
-    padding: 10px;
+    border: 1px solid #ccc;
+    padding: 12px;
     text-align: center;
+    color: #000; /* letras pretas e bem visíveis */
   }
   th {
-    background: #60492c;
-    color: #fff;
+    background-color: #f4f4f4;
+    font-weight: bold;
   }
-  td {
-    color: #000; /* letras pretas */
-    font-weight: 600;
-    background: #ffdf91;
-  }
-  tr:nth-child(even) td {
-    background: #f7d57f;
-  }
-  .extra-info {
+  .resultado {
     margin-top: 15px;
     text-align: center;
     font-weight: bold;
-    color: #f0c674;
-  }
-  #btnDesfazer {
-    background: #b94a48;
-    color: #fff;
-    display: none;
-  }
-  #btnDesfazer:hover {
-    background: #d96b69;
   }
 </style>
 </head>
 <body>
-
-  <h1>Divisão de Premiação</h1>
   <div class="container">
-    <label for="premio">Valor total da premiação (R$):</label>
-    <input type="number" id="premio" placeholder="Digite o valor total" min="0">
-    <button onclick="calcularPremio()">Calcular Divisão</button>
+    <h1>Divisão de Premiação</h1>
+    <label for="valorTotal">Valor total arrecadado (R$):</label>
+    <input type="number" id="valorTotal" placeholder="Digite o valor total">
+    <button id="calcular">Calcular Divisão</button>
+    <button id="salvarQuinto" disabled>Salvar o Quinto</button>
+    <button id="desfazerQuinto" disabled>Desfazer Quinto</button>
 
-    <table id="tabelaPremios" style="display:none;">
-      <thead>
-        <tr>
-          <th>Colocação</th>
-          <th>Valor (R$)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div class="extra-info" id="infoExtras"></div>
-
-    <button id="btnQuinto" style="display:none;" onclick="salvarQuinto()">💰 Salvar o Quinto</button>
-    <button id="btnDesfazer" onclick="desfazerQuinto()">↩️ Desfazer o Quinto</button>
+    <div id="resultado" class="resultado"></div>
   </div>
 
 <script>
-  let valores = {};
-  let valoresOriginais = {};
-  let totalDivisivel = 0;
-  let premioTotalGlobal = 0;
+let premiosOriginais = {};
+let quintoAdicionado = false;
+let valorQuinto = 0;
 
-  function arredondaParaDez(valor) {
-    return Math.round(valor / 10) * 10;
+document.getElementById('calcular').addEventListener('click', () => {
+  const total = parseFloat(document.getElementById('valorTotal').value);
+  if (isNaN(total) || total <= 0) {
+    alert("Digite um valor válido.");
+    return;
   }
 
-  function calcularPremio() {
-    const premioTotal = parseFloat(document.getElementById('premio').value);
-    if (isNaN(premioTotal) || premioTotal <= 0) {
-      alert('Por favor, insira um valor válido.');
-      return;
-    }
+  // Descontos iniciais
+  const casa = total * 0.10;
+  const porquinho = total * 0.05;
+  let restante = total - casa - porquinho;
 
-    premioTotalGlobal = premioTotal;
+  // Distribuição base
+  let p1 = restante * 0.50;
+  let p2 = restante * 0.25;
+  let p3 = restante * 0.15;
+  let p4 = restante * 0.10;
 
-    const casa = premioTotal * 0.10;
-    const porquinho = premioTotal * 0.05;
-    let restante = premioTotal - casa - porquinho;
+  // Arredondamento e ajuste de sobras
+  p1 = Math.round(p1 / 10) * 10;
+  p2 = Math.round(p2 / 10) * 10;
+  p3 = Math.round(p3 / 10) * 10;
+  p4 = Math.round(p4 / 10) * 10;
 
-    let p1 = restante * 0.50;
-    let p2 = restante * 0.25;
-    let p3 = restante * 0.15;
-    let p4 = restante * 0.10;
+  const distribuido = p1 + p2 + p3 + p4;
+  const sobra = restante - distribuido;
 
-    let totalQuebrados = 0;
-    [p1, p2, p3, p4] = [p1, p2, p3, p4].map(v => {
-      let arredondado = arredondaParaDez(v);
-      if (Math.abs(v - arredondado) < 10) {
-        totalQuebrados += Math.abs(v - arredondado);
-        return arredondado;
-      }
-      return arredondado;
-    });
+  let porquinhoFinal = porquinho + (sobra > 0 ? sobra : 0);
 
-    totalDivisivel = p1 + p2 + p3 + p4;
+  premiosOriginais = { total, casa, porquinho: porquinhoFinal, p1, p2, p3, p4 };
+  quintoAdicionado = false;
+  valorQuinto = 0;
 
-    valores = { casa, porquinho: porquinho + totalQuebrados, p1, p2, p3, p4, quinto: 0 };
-    valoresOriginais = JSON.parse(JSON.stringify(valores));
+  mostrarTabela(premiosOriginais);
+  document.getElementById('salvarQuinto').disabled = false;
+  document.getElementById('desfazerQuinto').disabled = true;
+});
 
-    atualizarTabela();
+document.getElementById('salvarQuinto').addEventListener('click', () => {
+  if (quintoAdicionado) {
+    alert("O quinto já foi salvo.");
+    return;
   }
 
-  function atualizarTabela() {
-    const tabela = document.getElementById('tabelaPremios');
-    const corpo = tabela.querySelector('tbody');
-    corpo.innerHTML = '';
+  let { total, casa, porquinho, p1, p2, p3, p4 } = premiosOriginais;
+  const salvarValor = total < 1000 ? 40 : 100; // valor total a ser redistribuído
 
-    const linhas = [
-      ['1º Lugar', valores.p1],
-      ['2º Lugar', valores.p2],
-      ['3º Lugar', valores.p3],
-      ['4º Lugar', valores.p4],
-    ];
+  // Divisão fixa (70 e 30)
+  const tirarP1 = 70;
+  const tirarP2 = 30;
+  const quinto = tirarP1 + tirarP2;
 
-    if (valores.quinto > 0) linhas.push(['5º Lugar', valores.quinto]);
+  // Garantir que não quebre a regra
+  const novoP1 = p1 - tirarP1;
+  const novoP2 = p2 - tirarP2;
+  const novoP3 = p3;
+  const novoP4 = p4;
 
-    linhas.forEach(([pos, val]) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${pos}</td><td>R$ ${val.toFixed(2)}</td>`;
-      corpo.appendChild(tr);
-    });
-
-    tabela.style.display = 'table';
-    document.getElementById('btnQuinto').style.display = 'block';
-    document.getElementById('btnDesfazer').style.display = valores.quinto > 0 ? 'block' : 'none';
-    document.getElementById('infoExtras').innerHTML =
-      `🏠 Casa: R$ ${valores.casa.toFixed(2)}<br>🐷 Porquinho: R$ ${valores.porquinho.toFixed(2)}<br>💵 Total distribuído: R$ ${totalDivisivel.toFixed(2)}`;
+  if (quinto >= novoP4) {
+    alert("Não é possível salvar o quinto — valor igual ou maior que o quarto lugar.");
+    return;
   }
 
-  function salvarQuinto() {
-    if (valores.quinto > 0) {
-      alert('O quinto já foi salvo!');
-      return;
-    }
+  // Mantém o total distribuído igual
+  const distribuidoAntigo = p1 + p2 + p3 + p4;
+  const distribuidoNovo = novoP1 + novoP2 + novoP3 + novoP4 + quinto;
+  const ajuste = distribuidoAntigo - distribuidoNovo;
+  porquinho += ajuste;
 
-    const valorQuinto = premioTotalGlobal < 1000 ? 40 : 80;
-    const desconto = valorQuinto / 4; // divide proporcionalmente entre os 4 primeiros
+  premiosOriginais = { total, casa, porquinho, p1: novoP1, p2: novoP2, p3: novoP3, p4: novoP4, p5: quinto };
+  quintoAdicionado = true;
+  valorQuinto = quinto;
 
-    // Realoca sem reduzir o total distribuído
-    valores.p1 -= desconto;
-    valores.p2 -= desconto;
-    valores.p3 -= desconto;
-    valores.p4 -= desconto;
-    valores.quinto = valorQuinto;
+  mostrarTabela(premiosOriginais);
+  document.getElementById('salvarQuinto').disabled = true;
+  document.getElementById('desfazerQuinto').disabled = false;
+});
 
-    atualizarTabela();
+document.getElementById('desfazerQuinto').addEventListener('click', () => {
+  if (!quintoAdicionado) {
+    alert("Nenhum quinto foi salvo ainda.");
+    return;
   }
 
-  function desfazerQuinto() {
-    valores = JSON.parse(JSON.stringify(valoresOriginais));
-    totalDivisivel = valores.p1 + valores.p2 + valores.p3 + valores.p4;
-    atualizarTabela();
-  }
+  const { p1, p2, p3, p4, total, casa, porquinho } = premiosOriginais;
+  // Restaura para valores originais (sem quinto)
+  document.getElementById('calcular').click();
+  document.getElementById('salvarQuinto').disabled = false;
+  document.getElementById('desfazerQuinto').disabled = true;
+});
+
+function mostrarTabela({ total, casa, porquinho, p1, p2, p3, p4, p5 }) {
+  let html = `
+    <table>
+      <tr><th>Posição</th><th>Prêmio (R$)</th></tr>
+      <tr><td>1º Lugar</td><td>${p1?.toFixed(2) || '-'}</td></tr>
+      <tr><td>2º Lugar</td><td>${p2?.toFixed(2) || '-'}</td></tr>
+      <tr><td>3º Lugar</td><td>${p3?.toFixed(2) || '-'}</td></tr>
+      <tr><td>4º Lugar</td><td>${p4?.toFixed(2) || '-'}</td></tr>
+      ${p5 ? `<tr><td>5º Lugar</td><td>${p5.toFixed(2)}</td></tr>` : ''}
+    </table>
+    <p>Casa: R$ ${casa.toFixed(2)} | Porquinho: R$ ${porquinho.toFixed(2)} | Total: R$ ${total.toFixed(2)}</p>
+  `;
+  document.getElementById('resultado').innerHTML = html;
+}
 </script>
 </body>
 </html>
