@@ -63,6 +63,10 @@
     background: #60492c;
     color: #fff;
   }
+  td {
+    color: #f9d97a;
+    font-weight: 600;
+  }
   tr:nth-child(even) {
     background: #4a4a4a;
   }
@@ -71,6 +75,14 @@
     text-align: center;
     font-weight: bold;
     color: #f0c674;
+  }
+  #btnDesfazer {
+    background: #b94a48;
+    color: #fff;
+    display: none;
+  }
+  #btnDesfazer:hover {
+    background: #d96b69;
   }
 </style>
 </head>
@@ -95,10 +107,12 @@
     <div class="extra-info" id="infoExtras"></div>
 
     <button id="btnQuinto" style="display:none;" onclick="salvarQuinto()">💰 Salvar o Quinto</button>
+    <button id="btnDesfazer" onclick="desfazerQuinto()">↩️ Desfazer o Quinto</button>
   </div>
 
 <script>
   let valores = {};
+  let valoresOriginais = {};
   let totalDivisivel = 0;
 
   function arredondaParaDez(valor) {
@@ -112,18 +126,15 @@
       return;
     }
 
-    // Cálculos iniciais
     const casa = premioTotal * 0.10;
     const porquinho = premioTotal * 0.05;
     let restante = premioTotal - casa - porquinho;
 
-    // Divisão bruta
     let p1 = restante * 0.50;
     let p2 = restante * 0.25;
     let p3 = restante * 0.15;
     let p4 = restante * 0.10;
 
-    // Arredonda e recolhe os quebrados menores que 10
     let totalQuebrados = 0;
     [p1, p2, p3, p4] = [p1, p2, p3, p4].map(v => {
       let arredondado = arredondaParaDez(v);
@@ -137,6 +148,7 @@
     totalDivisivel = p1 + p2 + p3 + p4;
 
     valores = { casa, porquinho: porquinho + totalQuebrados, p1, p2, p3, p4, quinto: 0 };
+    valoresOriginais = JSON.parse(JSON.stringify(valores)); // salva estado inicial
 
     atualizarTabela();
   }
@@ -163,6 +175,7 @@
 
     tabela.style.display = 'table';
     document.getElementById('btnQuinto').style.display = 'block';
+    document.getElementById('btnDesfazer').style.display = valores.quinto > 0 ? 'block' : 'none';
     document.getElementById('infoExtras').innerHTML =
       `🏠 Casa: R$ ${valores.casa.toFixed(2)}<br>🐷 Porquinho: R$ ${valores.porquinho.toFixed(2)}<br>💵 Total distribuído: R$ ${totalDivisivel.toFixed(2)}`;
   }
@@ -173,14 +186,19 @@
       return;
     }
 
-    let totalReduzido = totalDivisivel - 100;
-    valores.p1 -= 30;
-    valores.p2 -= 30;
+    totalDivisivel -= 80;
+    valores.p1 -= 20;
+    valores.p2 -= 20;
     valores.p3 -= 20;
     valores.p4 -= 20;
-    valores.quinto = 100;
-    totalDivisivel = totalReduzido + 100;
+    valores.quinto = 80;
 
+    atualizarTabela();
+  }
+
+  function desfazerQuinto() {
+    valores = JSON.parse(JSON.stringify(valoresOriginais));
+    totalDivisivel = valores.p1 + valores.p2 + valores.p3 + valores.p4;
     atualizarTabela();
   }
 </script>
