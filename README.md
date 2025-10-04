@@ -64,7 +64,7 @@
     color: #fff;
   }
   td {
-    color: #f9d97a;
+    color: #ffd55c; /* amarelo mais escuro e forte */
     font-weight: 600;
   }
   tr:nth-child(even) {
@@ -114,6 +114,7 @@
   let valores = {};
   let valoresOriginais = {};
   let totalDivisivel = 0;
+  let premioTotalGlobal = 0;
 
   function arredondaParaDez(valor) {
     return Math.round(valor / 10) * 10;
@@ -125,6 +126,8 @@
       alert('Por favor, insira um valor válido.');
       return;
     }
+
+    premioTotalGlobal = premioTotal;
 
     const casa = premioTotal * 0.10;
     const porquinho = premioTotal * 0.05;
@@ -148,7 +151,7 @@
     totalDivisivel = p1 + p2 + p3 + p4;
 
     valores = { casa, porquinho: porquinho + totalQuebrados, p1, p2, p3, p4, quinto: 0 };
-    valoresOriginais = JSON.parse(JSON.stringify(valores)); // salva estado inicial
+    valoresOriginais = JSON.parse(JSON.stringify(valores));
 
     atualizarTabela();
   }
@@ -186,12 +189,15 @@
       return;
     }
 
-    totalDivisivel -= 80;
-    valores.p1 -= 20;
-    valores.p2 -= 20;
-    valores.p3 -= 20;
-    valores.p4 -= 20;
-    valores.quinto = 80;
+    const valorQuinto = premioTotalGlobal < 1000 ? 40 : 80;
+    const desconto = valorQuinto / 4; // divide proporcionalmente entre os 4 primeiros
+
+    // Realoca sem reduzir total
+    valores.p1 -= desconto;
+    valores.p2 -= desconto;
+    valores.p3 -= desconto;
+    valores.p4 -= desconto;
+    valores.quinto = valorQuinto;
 
     atualizarTabela();
   }
