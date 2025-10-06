@@ -3,85 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Divisão de Premiação</title>
+<title>Ras Poker – Premiação</title>
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3141/3141129.png">
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     font-family: 'Poppins', sans-serif;
-    background: url('https://i.imgur.com/SGbM7aF.jpg') no-repeat center center fixed;
-    background-size: cover;
+    background: radial-gradient(circle at center, #4e342e, #2e1e16);
     margin: 0;
     padding: 20px;
-    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
   }
 
   .container {
-    max-width: 600px;
-    margin: auto;
-    background: rgba(60, 40, 20, 0.9);
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 450px;
+    background: linear-gradient(180deg, #3b2a1b, #24160f);
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     padding: 25px;
     text-align: center;
+    color: #fff;
+    position: relative;
   }
 
   h1 {
     color: #d4af37;
-    text-shadow: 2px 2px 4px #000;
+    text-shadow: 1px 1px 3px #000;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
   }
 
   label {
-    font-weight: bold;
-    font-size: 16px;
-    color: #f8f8f8;
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #f5f5f5;
+    font-size: 1rem;
   }
 
   input {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0 20px;
-    border-radius: 8px;
-    border: 1px solid #d4af37;
-    font-size: 16px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #d4af37;
+    background-color: #fff;
+    color: #000;
+    font-size: 1rem;
     text-align: center;
+    outline: none;
+    margin-bottom: 15px;
   }
 
   button {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     border: none;
-    border-radius: 10px;
-    font-size: 16px;
+    border-radius: 12px;
+    font-size: 1rem;
     font-weight: bold;
     color: #fff;
     cursor: pointer;
-    transition: 0.3s;
-    margin-top: 10px;
+    margin-bottom: 10px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   }
 
-  #calcular { background-color: #388e3c; }
+  #calcular { background-color: #2e7d32; }
   #salvarQuinto { background-color: #c49102; }
   #desfazerQuinto { background-color: #a93226; }
 
   button:hover {
-    opacity: 0.9;
-    transform: scale(1.03);
+    transform: translateY(-2px);
+    opacity: 0.95;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background-color: rgba(255,255,255,0.9);
-    border-radius: 10px;
+    background-color: rgba(255,255,255,0.95);
+    border-radius: 12px;
     overflow: hidden;
   }
 
   th, td {
     border: 1px solid #d4af37;
-    padding: 12px;
+    padding: 10px;
     text-align: center;
-    color: #000; /* Letras pretas */
-    font-weight: bold;
+    color: #000;
+    font-weight: 600;
   }
 
   th {
@@ -89,19 +106,65 @@
     color: #000;
   }
 
-  .resultado {
-    margin-top: 20px;
+  .resultado p {
+    color: #f5f5f5;
+    font-weight: 600;
+    margin-top: 10px;
+  }
+
+  #mensagem {
+    display: none;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(212,175,55,0.95);
+    color: #000;
     font-weight: bold;
-    color: #f8f8f8;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(212,175,55,0.8);
+    animation: fadeInOut 2s ease-in-out;
+    z-index: 10;
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translate(-50%, -10px); }
+    10% { opacity: 1; transform: translate(-50%, 0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -10px); }
+  }
+
+  @media (max-width: 480px) {
+    body {
+      padding: 10px;
+    }
+    .container {
+      padding: 20px;
+      border-radius: 15px;
+    }
+    h1 {
+      font-size: 1.4rem;
+    }
+    button {
+      font-size: 0.95rem;
+      padding: 12px;
+    }
+    input {
+      font-size: 0.95rem;
+    }
   }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Divisão de Premiação</h1>
+  <div id="mensagem">Quinto salvo com sucesso!</div>
+  <h1>Ras Poker – Premiação</h1>
+  
   <label for="valorTotal">Valor total arrecadado (R$):</label>
   <input type="number" id="valorTotal" placeholder="Digite o valor total">
+
   <button id="calcular">Calcular Divisão</button>
   <button id="salvarQuinto" disabled>Salvar o Quinto</button>
   <button id="desfazerQuinto" disabled>Desfazer Quinto</button>
@@ -120,18 +183,15 @@ document.getElementById('calcular').addEventListener('click', () => {
     return;
   }
 
-  // Descontos iniciais
   const casa = total * 0.10;
   const porquinho = total * 0.05;
   let restante = total - casa - porquinho;
 
-  // Distribuição base
   let p1 = restante * 0.50;
   let p2 = restante * 0.25;
   let p3 = restante * 0.15;
   let p4 = restante * 0.10;
 
-  // Arredondar para múltiplos de 10
   p1 = Math.round(p1 / 10) * 10;
   p2 = Math.round(p2 / 10) * 10;
   p3 = Math.round(p3 / 10) * 10;
@@ -139,7 +199,6 @@ document.getElementById('calcular').addEventListener('click', () => {
 
   const distribuido = p1 + p2 + p3 + p4;
   const sobra = restante - distribuido;
-
   let porquinhoFinal = porquinho + (sobra > 0 ? sobra : 0);
 
   premiosOriginais = { total, casa, porquinho: porquinhoFinal, p1, p2, p3, p4 };
@@ -157,8 +216,6 @@ document.getElementById('salvarQuinto').addEventListener('click', () => {
   }
 
   let { total, casa, porquinho, p1, p2, p3, p4 } = premiosOriginais;
-
-  // Decide valor e diluição padrão
   const valorQuinto = total < 1000 ? 40 : 80;
   const tirarPorPosicao = total < 1000 ? 10 : 20;
 
@@ -166,11 +223,9 @@ document.getElementById('salvarQuinto').addEventListener('click', () => {
   const novoP2 = p2 - tirarPorPosicao;
   const novoP3 = p3 - tirarPorPosicao;
   const novoP4 = p4 - tirarPorPosicao;
-
   const p5 = valorQuinto;
 
   if (p5 >= novoP4) {
-    // Caso não seja possível salvar convencionalmente
     const confirmar = confirm("Não é possível salvar o quinto da forma convencional.\nDeseja salvar com valor fixo de R$ 40?");
     if (confirmar) {
       const novoP1_alt = p1 - 20;
@@ -182,7 +237,6 @@ document.getElementById('salvarQuinto').addEventListener('click', () => {
         return;
       }
 
-      // Mantém o total distribuído igual
       const distribuidoAntigo = p1 + p2 + p3 + p4;
       const distribuidoNovo = novoP1_alt + novoP2_alt + p3 + p4 + p5_alt;
       const ajuste = distribuidoAntigo - distribuidoNovo;
@@ -194,7 +248,6 @@ document.getElementById('salvarQuinto').addEventListener('click', () => {
       return;
     }
   } else {
-    // Forma convencional aceita
     const distribuidoAntigo = p1 + p2 + p3 + p4;
     const distribuidoNovo = novoP1 + novoP2 + novoP3 + novoP4 + p5;
     const ajuste = distribuidoAntigo - distribuidoNovo;
@@ -205,6 +258,7 @@ document.getElementById('salvarQuinto').addEventListener('click', () => {
   }
 
   mostrarTabela(premiosOriginais);
+  mostrarMensagem("Quinto salvo com sucesso!");
   document.getElementById('salvarQuinto').disabled = true;
   document.getElementById('desfazerQuinto').disabled = false;
 });
@@ -230,6 +284,13 @@ function mostrarTabela({ total, casa, porquinho, p1, p2, p3, p4, p5 }) {
     <p>Casa: R$ ${casa.toFixed(2)} | Porquinho: R$ ${porquinho.toFixed(2)} | Total: R$ ${total.toFixed(2)}</p>
   `;
   document.getElementById('resultado').innerHTML = html;
+}
+
+function mostrarMensagem(texto) {
+  const msg = document.getElementById("mensagem");
+  msg.innerText = texto;
+  msg.style.display = "block";
+  setTimeout(() => { msg.style.display = "none"; }, 2000);
 }
 </script>
 </body>
