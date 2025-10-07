@@ -2,296 +2,266 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ras Poker – Premiação</title>
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3141/3141129.png">
+<title>Comandas - Sistema Visual</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: radial-gradient(circle at center, #4e342e, #2e1e16);
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-  }
-
-  .container {
-    width: 100%;
-    max-width: 450px;
-    background: linear-gradient(180deg, #3b2a1b, #24160f);
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-    padding: 25px;
-    text-align: center;
-    color: #fff;
-    position: relative;
-  }
-
-  h1 {
-    color: #d4af37;
-    text-shadow: 1px 1px 3px #000;
-    font-size: 1.6rem;
-    margin-bottom: 20px;
-  }
-
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #f5f5f5;
-    font-size: 1rem;
-  }
-
-  input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: 2px solid #d4af37;
-    background-color: #fff;
-    color: #000;
-    font-size: 1rem;
-    text-align: center;
-    outline: none;
-    margin-bottom: 15px;
-  }
-
-  button {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    cursor: pointer;
-    margin-bottom: 10px;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  }
-
-  #calcular { background-color: #2e7d32; }
-  #salvarQuinto { background-color: #c49102; }
-  #desfazerQuinto { background-color: #a93226; }
-
-  button:hover {
-    transform: translateY(-2px);
-    opacity: 0.95;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: rgba(255,255,255,0.95);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  th, td {
-    border: 1px solid #d4af37;
-    padding: 10px;
-    text-align: center;
-    color: #000;
-    font-weight: 600;
-  }
-
-  th {
-    background-color: #d4af37;
-    color: #000;
-  }
-
-  .resultado p {
-    color: #f5f5f5;
-    font-weight: 600;
-    margin-top: 10px;
-  }
-
-  #mensagem {
-    display: none;
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(212,175,55,0.95);
-    color: #000;
-    font-weight: bold;
-    padding: 12px 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(212,175,55,0.8);
-    animation: fadeInOut 2s ease-in-out;
-    z-index: 10;
-  }
-
-  @keyframes fadeInOut {
-    0% { opacity: 0; transform: translate(-50%, -10px); }
-    10% { opacity: 1; transform: translate(-50%, 0); }
-    90% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -10px); }
-  }
-
-  @media (max-width: 480px) {
-    body {
-      padding: 10px;
-    }
-    .container {
-      padding: 20px;
-      border-radius: 15px;
-    }
-    h1 {
-      font-size: 1.4rem;
-    }
-    button {
-      font-size: 0.95rem;
-      padding: 12px;
-    }
-    input {
-      font-size: 0.95rem;
-    }
-  }
+body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; display:flex; flex-direction: column; align-items: center; }
+h2 { color:#333; margin-bottom:10px; }
+table { border-collapse: collapse; width: 90%; margin-bottom: 20px; }
+th, td { border:1px solid #888; padding:6px 10px; text-align:center; }
+th { background:#ffcc00; color:#000; }
+td { color:#000; }
+td[contenteditable="true"] { background:#fffae5; border:1px dashed #ffcc00; }
+tr:nth-child(even){ background:#fdf5e6; }
+tr:nth-child(odd){ background:#fff; }
+button { padding: 4px 8px; margin:2px; border-radius:4px; cursor:pointer; font-weight:bold; border:none; }
+.btn-export,.btn-add,.btn-geral,.btn-reset,.btn-fechar,.btn-apagar,.btn-add-produto,.btn-editar-estoque,.btn-excluir-produto{ background:#ffcc00;color:#000; }
+.btn-export:hover,.btn-add:hover,.btn-geral:hover,.btn-reset:hover,.btn-fechar:hover,.btn-apagar:hover,.btn-add-produto:hover,.btn-editar-estoque:hover,.btn-excluir-produto:hover{ background:#ffb300; }
+.product-cell { font-weight:bold; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin:1px; }
+.product-btn { padding:2px 4px; margin:1px; border-radius:3px; font-weight:bold; font-size:12px; color:#fff; border:none; cursor:pointer; }
+.product-container { display:flex; flex-wrap:wrap; justify-content:center; gap:2px; }
+.status-aberta { background:#81d4fa; }
+.status-fechada { background:#ff8a80; }
+.produtos-vendidos span { margin:0 2px; padding:2px 4px; border-radius:3px; color:#fff; font-weight:bold; display:inline-block; font-size:12px; }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div id="mensagem">Quinto salvo com sucesso!</div>
-  <h1>Ras Poker – Premiação</h1>
-  
-  <label for="valorTotal">Valor total arrecadado (R$):</label>
-  <input type="number" id="valorTotal" placeholder="Digite o valor total">
-
-  <button id="calcular">Calcular Divisão</button>
-  <button id="salvarQuinto" disabled>Salvar o Quinto</button>
-  <button id="desfazerQuinto" disabled>Desfazer Quinto</button>
-
-  <div id="resultado" class="resultado"></div>
+<h2>Comandas Abertas</h2>
+<div style="margin-bottom:10px;">
+  <button class="btn-add" onclick="adicionarComanda()">➕ Adicionar Nova Comanda</button>
+  <button class="btn-reset" onclick="resetarConsumoComandas()">🔄 Resetar Consumo</button>
+  <button class="btn-geral" onclick="gerarRelatorioGeral()">📊 Gerar Relatório Geral</button>
+  <button class="btn-apagar" onclick="apagarComandasFechadas()">🗑️ Apagar Comandas Fechadas</button>
 </div>
 
+<table id="comandaAbertasTable">
+  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th><th>Vendidos</th></tr>
+</table>
+
+<h2>Comandas Fechadas</h2>
+<table id="comandaFechadasTable">
+  <tr><th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th></tr>
+</table>
+
+<h2>Gestão de Estoque</h2>
+<div style="margin-bottom:10px;">
+  <button class="btn-add-produto" onclick="adicionarProduto()">➕ Adicionar Produto</button>
+</div>
+<div id="estoqueDiv"></div>
+
 <script>
-let premiosOriginais = {};
-let quintoAdicionado = false;
+let coresProdutos = ["#4CAF50","#2196F3","#FF5722","#9C27B0","#FF9800","#795548","#607D8B","#FF4081"];
+let produtosLista = [];
+if(localStorage.getItem("produtosLista")){
+  produtosLista = JSON.parse(localStorage.getItem("produtosLista"));
+} else {
+  produtosLista = [
+    {nome:"Refri", valor:5, estoque:20},
+    {nome:"Cerveja", valor:15, estoque:15},
+    {nome:"Comida", valor:25, estoque:10}
+  ];
+  localStorage.setItem("produtosLista",JSON.stringify(produtosLista));
+}
 
-document.getElementById('calcular').addEventListener('click', () => {
-  const total = parseFloat(document.getElementById('valorTotal').value);
-  if (isNaN(total) || total <= 0) {
-    alert("Digite um valor válido.");
-    return;
+let comandas = [];
+if(localStorage.getItem("comandas")){
+  comandas = JSON.parse(localStorage.getItem("comandas"));
+} else {
+  let nomes = ["João","Maria","Pedro","Ana","Lucas"];
+  for(let i=0;i<10;i++){
+    comandas.push({nome:nomes[Math.floor(Math.random()*nomes.length)], numero:i+1, total:0, produtos:{}, fechada:false});
   }
+  salvarComandas();
+}
 
-  const casa = total * 0.10;
-  const porquinho = total * 0.05;
-  let restante = total - casa - porquinho;
+function salvarComandas(){
+  localStorage.setItem("comandas",JSON.stringify(comandas));
+  localStorage.setItem("produtosLista",JSON.stringify(produtosLista));
+}
 
-  let p1 = restante * 0.50;
-  let p2 = restante * 0.25;
-  let p3 = restante * 0.15;
-  let p4 = restante * 0.10;
+function atualizarEstoqueDiv(){
+  const div=document.getElementById("estoqueDiv");
+  div.innerHTML="";
+  const table=document.createElement("table");
+  const header=table.insertRow();
+  header.innerHTML="<th>Produto</th><th>Valor</th><th>Estoque</th><th>Editar</th><th>Excluir</th>";
+  produtosLista.forEach((p,index)=>{
+    const row=table.insertRow();
+    row.style.background=coresProdutos[index % coresProdutos.length];
+    const cellNome=row.insertCell(); cellNome.textContent=p.nome; cellNome.className="product-cell";
+    row.insertCell().textContent=`R$${p.valor}`;
+    const estoqueCell=row.insertCell(); estoqueCell.textContent=p.estoque;
+    const editCell=row.insertCell();
+    const btnEdit=document.createElement("button"); btnEdit.textContent="✏️"; btnEdit.className="btn-editar-estoque";
+    btnEdit.onclick=()=>{
+      const novoEstoque=parseInt(prompt(`Atualizar estoque de ${p.nome}:`,p.estoque));
+      if(!isNaN(novoEstoque)){ p.estoque=novoEstoque; salvarComandas(); atualizarEstoqueDiv(); atualizarTabelas();}
+    };
+    editCell.appendChild(btnEdit);
+    const delCell=row.insertCell();
+    const btnDel=document.createElement("button"); btnDel.textContent="❌"; btnDel.className="btn-excluir-produto";
+    btnDel.onclick=()=>{ if(confirm(`Excluir produto ${p.nome}?`)){ produtosLista.splice(index,1); salvarComandas(); atualizarEstoqueDiv(); atualizarTabelas(); }};
+    delCell.appendChild(btnDel);
+  });
+  div.appendChild(table);
+}
 
-  p1 = Math.round(p1 / 10) * 10;
-  p2 = Math.round(p2 / 10) * 10;
-  p3 = Math.round(p3 / 10) * 10;
-  p4 = Math.round(p4 / 10) * 10;
-
-  const distribuido = p1 + p2 + p3 + p4;
-  const sobra = restante - distribuido;
-  let porquinhoFinal = porquinho + (sobra > 0 ? sobra : 0);
-
-  premiosOriginais = { total, casa, porquinho: porquinhoFinal, p1, p2, p3, p4 };
-  quintoAdicionado = false;
-
-  mostrarTabela(premiosOriginais);
-  document.getElementById('salvarQuinto').disabled = false;
-  document.getElementById('desfazerQuinto').disabled = true;
-});
-
-document.getElementById('salvarQuinto').addEventListener('click', () => {
-  if (quintoAdicionado) {
-    alert("O quinto já foi salvo.");
-    return;
+function resetarConsumoComandas(){
+  if(confirm("Deseja realmente resetar o consumo de todas as comandas abertas?")){
+    comandas.forEach(c=>{
+      if(!c.fechada){
+        for(let p in c.produtos){
+          const prod = produtosLista.find(x=>x.nome===p);
+          if(prod) prod.estoque += c.produtos[p];
+        }
+        c.total=0; c.produtos={};
+      }
+    });
+    salvarComandas();
+    atualizarTabelas();
+    atualizarEstoqueDiv();
   }
+}
 
-  let { total, casa, porquinho, p1, p2, p3, p4 } = premiosOriginais;
-  const valorQuinto = total < 1000 ? 40 : 80;
-  const tirarPorPosicao = total < 1000 ? 10 : 20;
+function atualizarTabelas(){
+  const abertas = document.getElementById("comandaAbertasTable");
+  const fechadas = document.getElementById("comandaFechadasTable");
+  abertas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Finalizar</th><th>PNG</th><th>Produtos</th><th>Vendidos</th></tr>`;
+  fechadas.innerHTML=`<tr><th>Nome</th><th>Número</th><th>Total</th><th>Comprovante PNG</th></tr>`;
 
-  const novoP1 = p1 - tirarPorPosicao;
-  const novoP2 = p2 - tirarPorPosicao;
-  const novoP3 = p3 - tirarPorPosicao;
-  const novoP4 = p4 - tirarPorPosicao;
-  const p5 = valorQuinto;
+  comandas.forEach((c,index)=>{
+    const table = c.fechada ? fechadas : abertas;
+    const row = table.insertRow();
+    const nomeCell=row.insertCell(); nomeCell.textContent=c.nome; nomeCell.contentEditable=!c.fechada; nomeCell.onblur=()=>{c.nome=nomeCell.textContent; salvarComandas();}
+    const numCell=row.insertCell(); numCell.textContent=c.numero; numCell.contentEditable=!c.fechada; numCell.onblur=()=>{ const n=parseInt(numCell.textContent); c.numero=isNaN(n)?c.numero:n; salvarComandas(); }
+    const totalCell=row.insertCell(); totalCell.textContent=`R$${c.total}`;
 
-  if (p5 >= novoP4) {
-    const confirmar = confirm("Não é possível salvar o quinto da forma convencional.\nDeseja salvar com valor fixo de R$ 40?");
-    if (confirmar) {
-      const novoP1_alt = p1 - 20;
-      const novoP2_alt = p2 - 20;
-      const p5_alt = 40;
+    if(!c.fechada){
+      const finalizarCell=row.insertCell();
+      const btnFinalizar=document.createElement("button");
+      btnFinalizar.textContent="Finalizar"; btnFinalizar.className="btn-fechar";
+      btnFinalizar.onclick=()=>{ c.fechada=true; salvarComandas(); atualizarTabelas(); exportarComandaDetalhada(index,true); };
+      finalizarCell.appendChild(btnFinalizar);
 
-      if (p5_alt >= p4) {
-        alert("Mesmo com valor fixo, o quinto ficaria igual ou maior que o quarto. Ação cancelada.");
-        return;
+      const pngCell=row.insertCell();
+      const btnPNG=document.createElement("button"); btnPNG.textContent="📷 PNG"; btnPNG.className="btn-export";
+      btnPNG.onclick=()=>exportarComandaDetalhada(index,false);
+      pngCell.appendChild(btnPNG);
+
+      const prodCell=row.insertCell(); 
+      const divProdutos=document.createElement("div"); divProdutos.className="product-container";
+      produtosLista.forEach((prod,pIndex)=>{
+        const btn=document.createElement("button");
+        btn.textContent=`${prod.nome} (+R$${prod.valor})`;
+        btn.className="product-btn"; btn.style.background=coresProdutos[pIndex % coresProdutos.length];
+        btn.disabled = prod.estoque<=0;
+        btn.onclick=()=>{
+          if(prod.estoque>0){
+            c.produtos[prod.nome]=(c.produtos[prod.nome]||0)+1;
+            c.total+=prod.valor;
+            prod.estoque--;
+            salvarComandas();
+            atualizarTabelas();
+            atualizarEstoqueDiv();
+          }
+        };
+        divProdutos.appendChild(btn);
+      });
+      prodCell.appendChild(divProdutos);
+
+      const vendidosDiv=row.insertCell();
+      vendidosDiv.className="produtos-vendidos";
+      for(let p in c.produtos){
+        const span=document.createElement("span");
+        const idx = produtosLista.findIndex(x=>x.nome===p);
+        span.style.background=coresProdutos[idx % coresProdutos.length];
+        span.textContent=`${p}: ${c.produtos[p]}`;
+        vendidosDiv.appendChild(span);
       }
 
-      const distribuidoAntigo = p1 + p2 + p3 + p4;
-      const distribuidoNovo = novoP1_alt + novoP2_alt + p3 + p4 + p5_alt;
-      const ajuste = distribuidoAntigo - distribuidoNovo;
-      porquinho += ajuste;
-
-      premiosOriginais = { total, casa, porquinho, p1: novoP1_alt, p2: novoP2_alt, p3, p4, p5: p5_alt };
-      quintoAdicionado = true;
     } else {
-      return;
+      const pngCell=row.insertCell();
+      const btnPNG=document.createElement("button"); btnPNG.textContent="📷 PNG"; btnPNG.className="btn-export";
+      btnPNG.onclick=()=>exportarComandaDetalhada(index,true);
+      pngCell.appendChild(btnPNG);
     }
-  } else {
-    const distribuidoAntigo = p1 + p2 + p3 + p4;
-    const distribuidoNovo = novoP1 + novoP2 + novoP3 + novoP4 + p5;
-    const ajuste = distribuidoAntigo - distribuidoNovo;
-    porquinho += ajuste;
-
-    premiosOriginais = { total, casa, porquinho, p1: novoP1, p2: novoP2, p3: novoP3, p4: novoP4, p5 };
-    quintoAdicionado = true;
-  }
-
-  mostrarTabela(premiosOriginais);
-  mostrarMensagem("Quinto salvo com sucesso!");
-  document.getElementById('salvarQuinto').disabled = true;
-  document.getElementById('desfazerQuinto').disabled = false;
-});
-
-document.getElementById('desfazerQuinto').addEventListener('click', () => {
-  if (!quintoAdicionado) {
-    alert("Nenhum quinto foi salvo ainda.");
-    return;
-  }
-  document.getElementById('calcular').click();
-});
-
-function mostrarTabela({ total, casa, porquinho, p1, p2, p3, p4, p5 }) {
-  let html = `
-    <table>
-      <tr><th>Posição</th><th>Prêmio (R$)</th></tr>
-      <tr><td>1º Lugar</td><td>${p1?.toFixed(2) || '-'}</td></tr>
-      <tr><td>2º Lugar</td><td>${p2?.toFixed(2) || '-'}</td></tr>
-      <tr><td>3º Lugar</td><td>${p3?.toFixed(2) || '-'}</td></tr>
-      <tr><td>4º Lugar</td><td>${p4?.toFixed(2) || '-'}</td></tr>
-      ${p5 ? `<tr><td>5º Lugar</td><td>${p5.toFixed(2)}</td></tr>` : ''}
-    </table>
-    <p>Casa: R$ ${casa.toFixed(2)} | Porquinho: R$ ${porquinho.toFixed(2)} | Total: R$ ${total.toFixed(2)}</p>
-  `;
-  document.getElementById('resultado').innerHTML = html;
+  });
 }
 
-function mostrarMensagem(texto) {
-  const msg = document.getElementById("mensagem");
-  msg.innerText = texto;
-  msg.style.display = "block";
-  setTimeout(() => { msg.style.display = "none"; }, 2000);
+function adicionarComanda(){
+  let nome=prompt("Nome do cliente:");
+  if(!nome) return;
+  let numero=prompt("Número da comanda:",comandas.length?Math.max(...comandas.map(c=>c.numero))+1:1);
+  if(isNaN(numero) || numero==="") numero=comandas.length?Math.max(...comandas.map(c=>c.numero))+1:1;
+  comandas.push({nome, numero:parseInt(numero), total:0, produtos:{}, fechada:false});
+  salvarComandas();
+  atualizarTabelas();
 }
+
+function adicionarProduto(){
+  let nome=prompt("Nome do produto:");
+  if(!nome) return;
+  let valor=parseFloat(prompt("Valor do produto:"));
+  if(isNaN(valor)) return alert("Valor inválido");
+  let estoque=parseInt(prompt("Quantidade em estoque:"));
+  if(isNaN(estoque)) return alert("Estoque inválido");
+  produtosLista.push({nome, valor, estoque});
+  salvarComandas();
+  atualizarEstoqueDiv();
+  atualizarTabelas();
+}
+
+function exportarComandaDetalhada(index,finalizada=false){
+  const c=comandas[index];
+  const div=document.createElement("div");
+  div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="350px"; div.style.fontFamily="Arial";
+  div.innerHTML=`<h3>Comanda #${c.numero} - ${c.nome}</h3>`;
+  div.innerHTML+=`<p>Status: ${finalizada ? "FINALIZADA E PAGA" : "ABERTA"}</p>`;
+  div.innerHTML+="<ul>";
+  for(let p in c.produtos){ div.innerHTML+=`<li>${p}: ${c.produtos[p]}</li>`; }
+  div.innerHTML+="</ul>";
+  div.innerHTML+=`<p><strong>Total: R$${c.total}</strong></p>`;
+  document.body.appendChild(div);
+  html2canvas(div).then(canvas=>{
+    const win = window.open();
+    win.document.body.appendChild(canvas);
+    div.remove();
+  });
+}
+
+function gerarRelatorioGeral(){
+  const div=document.createElement("div");
+  div.style.padding="20px"; div.style.background="#fff"; div.style.border="2px solid #000"; div.style.width="400px"; div.style.fontFamily="Arial";
+  div.innerHTML="<h3>Relatório Geral</h3>";
+  let totalGeral=0; let produtosTotais={};
+  comandas.filter(c=>c.fechada).forEach(c=>{
+    div.innerHTML+=`<p>${c.nome} (#${c.numero}) - Total R$${c.total}</p>`;
+    totalGeral+=c.total;
+    for(let k in c.produtos){ produtosTotais[k]=(produtosTotais[k]||0)+c.produtos[k]; }
+  });
+  div.innerHTML+="<h4>Itens vendidos:</h4><ul>"+Object.entries(produtosTotais).map(([k,v])=>`<li>${k}: ${v}</li>`).join('')+"</ul>";
+  div.innerHTML+=`<p><strong>Total Geral Arrecadado: R$${totalGeral}</strong></p>`;
+  document.body.appendChild(div);
+  html2canvas(div).then(canvas=>{
+    const link=document.createElement("a");
+    link.download="relatorio_geral.png";
+    link.href=canvas.toDataURL();
+    link.click();
+    div.remove();
+  });
+}
+
+function apagarComandasFechadas(){
+  if(confirm("Deseja apagar todas as comandas fechadas?")){
+    comandas=comandas.filter(c=>!c.fechada);
+    salvarComandas();
+    atualizarTabelas();
+  }
+}
+
+atualizarEstoqueDiv();
+atualizarTabelas();
 </script>
 </body>
 </html>
